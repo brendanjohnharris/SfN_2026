@@ -1,1 +1,2 @@
-*.code-workspace__pycache__/
+*.code-workspace
+__pycache__/
