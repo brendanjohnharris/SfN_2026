@@ -217,12 +217,35 @@ VARIANTS = [
     ),
 ]
 
+VARIANTS.append(dict(
+    n="1f", file="option1f-construction.svg", frame="The construction, as networks on oblique planes",
+    pitch="Which links did the grating add?",
+    reads=[
+        "Panel (a): the stimulus set is a line of directions, drawn as a curve with four gratings on it. Each grating drives a different unit on the sheet (coloured arrows), so the driven group reads four different points of the line: these units carry information about the stimulus. The shared input is still running in the background (faint box and arrows) and lights its own group. Units that fire together get strong links, and all eleven lit units look the same in the recording, so they are drawn in one colour.",
+        "Panel (b): the gray screen. Nothing on the manifold, but one shared signal (arousal, running) pumps seven units, and each lit unit shows a copy of the same trace in an inset. The copies are the redundancy cue: seven units, one number. Their links are blue, and the seven are a subset of the eleven in (a).",
+        "The arrow with the question mark asks for (a) minus (b). Panel (c) is the answer the reader wants: the four units and six links the grating added. The subtraction is only the intuition, and the panel says so: Baseline PCA does the contrast on covariance, relative to (b), after removing the spiking noise.",
+        "The networks sit on oblique sheets (shear 0.5, squash 0.6), which saves height and makes the three pictures read as the same population seen three times.",
+    ],
+    lead="Think of the stimulus as a line of directions and the population as a sheet of units. A grating lights up the units that read its point on the line, and units that fire together get stronger links. But a shared signal (arousal, running) is pumping the sheet all along: on a gray screen it still lights seven units, each copying the same trace. Those links are redundant, one signal counted seven times, and they are the largest cluster in the recording, so PCA returns them first.",
+    caption="(a) Drifting gratings: a line of directions feeds a sheet of 16 units. Each grating drives one unit most (coloured arrows) and the shared input keeps driving its group (faint). Eleven units fire, and co-active units are linked. (b) Gray screen: the shared input alone lights seven units, each a copy of one signal (insets): redundant links, and a subset of (a). (c) Which units and links did the grating add? Subtracting the pictures is the idea; Baseline PCA measures the variance in (a) relative to (b), above the spiking noise, one direction at a time.",
+    handoff="Panel (b) is the <b class=\"blue\">redundancy baseline</b> by name and by picture: one signal measured seven times. The <b class=\"red\">noise baseline</b> enters in (c) as what is removed before the contrast. “Redundancy” in Section 2 is then already defined as “copies of one signal”, which is also what the paper's seven cameras meant.",
+    strengths=[
+        "Carries the construction, not only the complaint: manifold to tuned units to links, shared input to copies to links.",
+        "The subset relation is visible, the question is explicit, the tilted sheets save height, and the copies-of-one-trace insets make redundancy a thing you can see.",
+    ],
+    risks=[
+        "Panel (a) is dense, with two inputs.",
+        "“(a) − (b)” suggests a difference of covariance matrices, which is cPCA, not bPCA; the caption's last sentence has to carry the correction. Direction is a circle, drawn here as a line. The insets must stay at least 40 poster units wide to read as identical.",
+    ],
+))
+
 TABLE = [
     ("1 Networks", "“functional connectivity”", "the recording is two networks plus noise; PCA picks the bigger", "spontaneous network / spiking noise", "high", "reads as a connectivity method"),
     ("1b Zoom", "“an edge is a correlation”", "the whole system, and one pair opened up", "pair scatter on gray screen / dot jitter", "medium", "busy"),
     ("1c Raster to network", "“that's my raster”", "gray screen already has blocks; the grating adds one", "matrix (b) is Σ²ᵣ", "medium", "seven panels"),
     ("1d Flipbook", "“fire together, wire together”", "units that light up together get an edge, stimulus or not", "blue network / lone flicker", "high", "slogan suggests plasticity"),
     ("1e Arcs", "“network on the raster”", "same rows, more arcs", "blue arcs / noise", "medium", "unfamiliar drawing"),
+    ("1f Construction", "“which links did the grating add?”", "manifold lights tuned units; shared input lights copies", "(b) copies of one signal / noise removed in (c)", "high", "(a) is dense; “minus” reads as cPCA"),
     ("2 State space", "“noise-correlation scatter”", "PC1 is the shared gain; the stimulus is across it", "blue ellipse / red disc", "low", "the standard cartoon"),
     ("3 ΔF/F", "“that's ΔF/F”", "λ − 1 is ΔF/F for covariance", "F₀ / dark frame", "medium", "does not show why PCA fails"),
     ("4 Control", "“where is the control?”", "the baselines are already in the session", "control 1 / control 2", "low", "not a picture of the problem"),
@@ -361,7 +384,7 @@ def main(out):
   <h2>Recommendation</h2>
   <div class="col" style="display:grid;gap:12px">
     <p>Use <b>Option 2 as the figure</b>, with <b>Option 4 reduced to a one-line strip</b> under it saying where the three inputs come from. It is the picture neuroscientists already use to think about population coding, so there is nothing to translate; it previews Section 3's panels (f)–(h), so the poster reads as one story from column 1 to column 2; and the headline numbers (31° to 9°) can sit in the opening. Then borrow Option 3's gloss for Section 2's equation (“λ − 1 is ΔF/F for covariance, one direction at a time”), the quickest way to make the eigenvalue mean something.</p>
-    <p>If the whole-system view matters more, take the network family. Among its variants, <b>1c</b> is the safest (every element is a real analysis object, and its matrices are literally Σ²ᵣ and Σ²), <b>1d</b> is the most memorable and the only one that teaches what an edge means without a scatter plot or a matrix, <b>1b</b> is the best bridge to the state-space picture, and <b>1e</b> is the most compact. If the opening is to be a network, use <b>1d</b> as the figure, with its slogan as the header subtitle, and reuse 1c's matrices (b) and (e) beside Section 2's equation, where they become Σ²ᵣ and Σ² without renaming. Keep Option 2's panel (c) in Section 2, where it already lives, so the two-neuron geometry still appears once.</p>
+    <p>If the whole-system view matters more, take the network family. Among its variants, <b>1c</b> is the safest (every element is a real analysis object, and its matrices are literally Σ²ᵣ and Σ²), <b>1d</b> is the most memorable and the only one that teaches what an edge means without a scatter plot or a matrix, <b>1b</b> is the best bridge to the state-space picture, <b>1e</b> is the most compact, and <b>1f</b> carries the construction itself and poses the question the method answers. If the opening is to be a network, use <b>1f</b> as the figure, with “Which links did the grating add?” as the header subtitle, and reuse 1c's matrices (b) and (e) beside Section 2's equation, where they become Σ²ᵣ and Σ² without renaming. Keep Option 2's panel (c) in Section 2, where it already lives, so the two-neuron geometry still appears once.</p>
     <p>By audience: mostly systems electrophysiology, Option 2; mostly imaging, Option 3; a crowd that asks “do I need new data?”, Option 4; neighbours presenting spontaneous activity, Option 5.</p>
     <p>Hybrids that fit the slot:</p>
     <ul>

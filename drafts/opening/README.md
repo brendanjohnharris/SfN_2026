@@ -5,9 +5,10 @@ own schematic, lead text, caption, and hand-off to Section 2. Nothing here is wi
 
 Files: `optionN-*.svg` (1460 x 780 poster units, drawn to drop into the Section 1 figure slot at
 k = 0.93), `preview/optionN-*.png` (renders), `make_drafts.py` + `svgkit.py` (generator for options
-1–5), `make_variants.py` (the four network variants 1b–1e, from simulated spikes), `render.js` (SVG
-to PNG with the pre-installed Playwright Chromium), `build_page.py` (the comparison page).
-Regenerate with `python3 make_drafts.py && python3 make_variants.py && node render.js preview 1 option*.svg`.
+1–5), `make_variants.py` (the four network variants 1b–1e, from simulated spikes), `make_1f.py` (the
+construction figure on oblique planes), `render.js` (SVG to PNG with the pre-installed Playwright
+Chromium), `build_page.py` (the comparison page). Regenerate with
+`python3 make_drafts.py && python3 make_variants.py && python3 make_1f.py && node render.js preview 1 option*.svg`.
 
 ## What the opening has to do
 
@@ -265,6 +266,66 @@ with text. "Same rows, more arcs" is obvious at a glance.
 **Risks.** Arc diagrams are less familiar than node-link drawings. Chance correlations produce stray
 long arcs (one in (a)) that need pruning or a word of explanation.
 
+### 1f. The construction, as networks on oblique planes
+
+![Option 1f](preview/option1f-construction.png)
+
+**Subtitle:** *Which links did the grating add?*
+
+This is the version that carries the construction rather than only the problem, built from
+Brendan's description after the first round: the stimulus manifold feeding the network, the gray
+screen pumping a different set that is visibly a subset of the first, and a question-mark arrow to
+the extraction. The networks sit on oblique sheets (shear 0.5, squash 0.6 in `make_1f.py`), which
+saves height and makes the three pictures read as the same population seen three times.
+
+**How it reads.**
+
+1. Panel (a): the stimulus set is a line of directions, drawn as a curve with four gratings on it.
+   Each grating drives a different unit on the sheet (coloured arrows), so the driven group reads
+   four different points of the line: these units carry information about the stimulus. The shared
+   input is still running in the background (faint box, faint arrows) and lights its own group.
+   Units that fire together get strong links, and all eleven lit units look the same in the
+   recording, so they are drawn in one colour.
+2. Panel (b): the gray screen. Nothing on the manifold, but one shared signal (arousal, running)
+   pumps seven units, and each lit unit shows a copy of the same trace in an inset. The copies are
+   the redundancy cue: seven units, one number. Their links are blue, and the seven are a subset of
+   the eleven in (a).
+3. The arrow with the question mark asks for (a) minus (b). Panel (c) is the answer the reader
+   wants: the four units and six links the grating added. The subtraction is only the intuition,
+   and the panel says so: Baseline PCA does the contrast on covariance, relative to (b), after
+   removing the spiking noise.
+
+**Lead text:**
+
+> Think of the stimulus as a line of directions and the population as a sheet of units. A grating
+> lights up the units that read its point on the line, and units that fire together get stronger
+> links. But a shared signal (arousal, running) is pumping the sheet all along: on a gray screen it
+> still lights seven units, each copying the same trace. Those links are redundant, one signal
+> counted seven times, and they are the largest cluster in the recording, so PCA returns them first.
+
+**Caption:**
+
+> (a) Drifting gratings: a line of directions feeds a sheet of 16 units. Each grating drives one unit
+> most (coloured arrows) and the shared input keeps driving its group (faint). Eleven units fire,
+> and co-active units are linked. (b) Gray screen: the shared input alone lights seven units, each a
+> copy of one signal (insets): redundant links, and a subset of (a). (c) Which units and links did
+> the grating add? Subtracting the pictures is the idea; Baseline PCA measures the variance in (a)
+> relative to (b), above the spiking noise, one direction at a time.
+
+**Hand-off to Section 2.** Panel (b) is the redundancy baseline by name and by picture: one signal
+measured seven times. The noise baseline enters in (c) as what is removed before the contrast. The
+word "redundancy" in Section 2 is then already defined as "copies of one signal", which is also what
+the paper's seven cameras meant.
+
+**Strengths.** It carries the construction, not only the complaint: manifold to tuned units to links,
+shared input to copies to links. The subset relation is visible, the question is explicit, and the
+tilted sheets save height. The copies-of-one-trace insets make redundancy a thing you can see.
+
+**Risks.** Panel (a) is dense, with two inputs. "(a) − (b)" suggests a difference of covariance
+matrices, which is cPCA, not bPCA; the caption's last sentence has to carry the correction. Direction
+is a circle (0 to 360°), drawn here as a line. The insets must stay at least 40 poster units wide to
+be read as identical.
+
 ### Choosing among the network variants
 
 - **1c** is the safest: every element is a real analysis object, and its matrices are literally
@@ -274,9 +335,14 @@ long arcs (one in (a)) that need pruning or a word of explanation.
 - **1b** is the best bridge to the state-space picture (Option 2) and to Section 3's scatter panels.
 - **1e** is the most compact, at the cost of an unfamiliar drawing.
 
-If the opening is to be a network, use **1d** as the figure, with its slogan as the header subtitle,
-and reuse 1c's two matrices (b) and (e) beside Section 2's equation, where they become Σ²ᵣ and Σ²
-without renaming.
+- **1f** carries the construction itself (stimulus manifold, tuned units, shared input, copies) and
+  poses the question the method answers. It is the one to take forward if the network opening has
+  to teach both the problem and the setup of the baselines.
+
+If the opening is to be a network, use **1f** as the figure, with "Which links did the grating
+add?" as the header subtitle, and reuse 1c's two matrices (b) and (e) beside Section 2's equation,
+where they become Σ²ᵣ and Σ² without renaming. 1d's frames can become the Section 3 header strip if
+the "lighting up together" intuition is wanted twice.
 
 ---
 
@@ -492,6 +558,7 @@ premise is familiar, the figure is the least surprising of the five.
 | 1c Raster to network | "that's my raster" | gray screen already has blocks; the grating adds one | matrix (b) is Σ²ᵣ | medium | seven panels |
 | 1d Flipbook | "fire together, wire together" | units that light up together get an edge, stimulus or not | blue network / lone flicker | high | slogan suggests plasticity |
 | 1e Arcs | "network on the raster" | same rows, more arcs | blue arcs / noise | medium | unfamiliar drawing |
+| 1f Construction | "which links did the grating add?" | manifold lights tuned units; shared input lights copies | (b) copies of one signal / noise removed in (c) | high | (a) is dense; "minus" reads as cPCA |
 | 2 State space | "noise-correlation scatter" | PC1 is the shared gain; the stimulus is across it | blue ellipse / red disc | low | the standard cartoon |
 | 3 ΔF/F | "that's ΔF/F" | λ − 1 is ΔF/F for covariance | F₀ / dark frame | medium | does not show why PCA fails |
 | 4 Control | "where is the control?" | the baselines are already in the session | control 1 / control 2 | low | not a picture of the problem |
@@ -507,9 +574,9 @@ the opening. Then borrow Option 3's gloss for Section 2's equation ("λ − 1 is
 one direction at a time"), which is the quickest way to make the eigenvalue mean something.
 
 If the whole-system view matters more, which is the case Brendan made after the first round, take
-the network family: **1d** as the figure (the slogan as subtitle, the frames teaching what an edge
-is), with 1c's matrices reused beside Section 2's equation. Keep Option 2's panel (c) in Section 2,
-where it already lives, so the two-neuron geometry still appears once.
+the network family: **1f** as the figure (it carries the construction and poses the question), with
+1c's matrices reused beside Section 2's equation. Keep Option 2's panel (c) in Section 2, where it
+already lives, so the two-neuron geometry still appears once.
 
 A decision rule by audience: mostly systems electrophysiology, Option 2; mostly imaging, Option 3;
 a crowd that asks "do I need new data?", Option 4; neighbours presenting spontaneous activity,
