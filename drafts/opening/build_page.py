@@ -130,8 +130,99 @@ OPTIONS = [
     ),
 ]
 
+VARIANTS_INTRO = """The network in Option 1 is drawn by hand, so nothing in it says what a line <em>is</em>. These four variants keep the whole-system view but build the network from spiking data, so the reader can see that an edge joins two units whose firing rates rise and fall together. All four come from one simulated population: 14 units, 12 s at 50 ms bins, Poisson spikes. Units 1–10 belong to two spontaneous groups that share a hub unit, each group driven by its own slow fluctuation (arousal, running). Units 11–14 are a module tuned to grating direction; two of them also lean weakly on the first group, so the same neurons carry both. Correlations are Pearson r between rates in 150 ms windows, and an edge is drawn where r &gt; 0.35."""
+
+VARIANTS = [
+    dict(
+        n="1b", file="option1b-zoom.svg", frame="An edge, exploded into the pair's data",
+        pitch="An edge is two units whose rates rise and fall together",
+        reads=[
+            "Panel (a) is the network in its true colours: two blue groups (correlated with nothing on the screen) and a green module (correlation the grating adds). A magnifier sits on one blue edge and one green edge.",
+            "Panel (b) opens the blue edge. The two units' rates over 12 s of gray screen bump at the same moments, and their rates in 200 ms windows, plotted against each other, make a tilted cloud: r = 0.88. That is all an edge is.",
+            "Panel (c) opens the green edge. During gratings the two units burst under the stimulus bars, and the scatter, coloured by direction, pulls the four directions apart; windows with no grating (grey) sit near the origin. A green edge is covariance the grating creates, and it carries the direction.",
+        ],
+        lead="Draw a line between any two units whose firing rates rise and fall together, and a population recording becomes a network. Most of its lines are there with nothing on the screen: shared inputs, arousal, running. The grating adds a few more, among the units it drives. PCA, which ranks directions by total variance, returns the biggest cluster of lines, which is not the stimulus.",
+        caption="(a) Units linked when their rates are correlated: blue on the gray screen, green only during gratings. (b) One blue edge: the pair's rates on the gray screen and their joint distribution (r = 0.88). (c) One green edge: the pair's rates during gratings, and their joint distribution coloured by direction (crosses: class means; grey: no grating). The recording draws every edge in black. bPCA measures the blue network and the spiking noise, and ranks what the grating adds.",
+        handoff="Panel (b) is the <b class=\"blue\">redundancy baseline</b> seen for one pair; the ellipse of (c) beyond the ellipse of (b) is what bPCA ranks; the <b class=\"red\">noise baseline</b> is the jitter of each dot that would remain if the rates were held fixed. Panel (c) is also Section 3's panel (g) for two units.",
+        strengths=[
+            "Answers “what is an edge?” with the plot every electrophysiologist uses.",
+            "Merges Option 1 (the whole system) with Option 2 (one pair); the green scatter previews the decoding result.",
+        ],
+        risks=[
+            "The busiest of the network variants: two callouts compete with the network, and at poster scale they need the full slot height.",
+            "The magnified pairs must be chosen so their traces look clean.",
+        ],
+    ),
+    dict(
+        n="1c", file="option1c-raster.svg", frame="Spike raster, correlation matrix, network",
+        pitch="Correlations that are there with nothing on the screen",
+        reads=[
+            "Panel (a) is a raster of 14 units on the gray screen. Dense vertical bands show groups of units firing together, at moments that have nothing to do with a stimulus.",
+            "Panel (b) is the correlation matrix of their rates. The two bands become two blocks (units 1–6 and 6–10, sharing unit 6).",
+            "Panel (c) draws the matrix as a network: an edge wherever r > 0.35. Two clusters, and that is everything the matrix said.",
+            "Panels (d)–(f) repeat this during gratings. The bands are still there, units 11–14 now burst at every grating, the matrix gains a third block, and the network gains a clique, drawn in black like every other edge because the recording does not label them.",
+            "Panel (g) keeps only the edges of (f) that are not in (c): the few units that fire together only when the grating is on.",
+        ],
+        lead="Correlate every unit with every other unit and a recording becomes a matrix, and the matrix a network. On a gray screen the matrix already has blocks: groups of units that rise and fall together under shared inputs, arousal and running. A grating adds one block more. PCA diagonalises the whole matrix, so its leading components are the biggest blocks, which were there without the stimulus.",
+        caption="(a)–(c) Gray screen: spike raster, correlation matrix of the rates, and the matrix as a network (edge where r > 0.35). (d)–(f) The same during drifting gratings (bars: direction). (g) Edges present in (f) but not in (c). PCA on (e) returns the large blocks, the spontaneous correlations. bPCA measures (b) and the spiking noise, and returns (g).",
+        handoff="Matrix (b) <em>is</em> the <b class=\"blue\">redundancy baseline</b> Σ²ᵣ and matrix (e) is Σ²; nothing is renamed. The <b class=\"red\">noise baseline</b> is what each unit's diagonal entry holds beyond the trend of its neighbouring lags (Section 3's nugget), so Section 3's noise box follows naturally.",
+        strengths=[
+            "Nothing is metaphorical: the raster is the data, the matrix is the covariance PCA and bPCA actually consume, the network is only the matrix thresholded.",
+            "The block structure explains “redundancy” even to a physicist. Panel (g) is the stimulus-engaged subspace as a picture.",
+        ],
+        risks=[
+            "Seven panels. For matrix-literate readers the network adds little over the matrix.",
+            "Rasters print badly when small: at poster scale the bins must stay at least a point wide.",
+        ],
+    ),
+    dict(
+        n="1d", file="option1d-flipbook.svg", frame="Flipbook: units that light up together get an edge",
+        pitch="Fire together, wire together, even with nothing on the screen",
+        reads=[
+            "Six snapshots of the same 14 units at six moments of one recording; a filled dot is a unit firing in that half second. At the gray-screen moments one group lights up together, or the other. At the grating moments a different group of four lights up.",
+            "The raster underneath shows where the six moments sit, so the snapshots are visibly taken from the data.",
+            "On the right, every pair that lit up together in two or more gray-screen moments gets a blue edge; pairs that lit up together only during gratings get a green one. The network is assembled in front of the reader.",
+        ],
+        lead="Watch a population for a few seconds and the same groups of units keep lighting up together, with nothing on the screen. Link every pair that does, and you have a network that owes nothing to the stimulus. A grating lights up one more group. PCA ranks directions by total variance, so its leading component is the group that lights up most, not the one the grating drives.",
+        caption="Top: six moments of one recording (filled: units firing in that 0.5 s; green frames fall during a grating). Bottom left: the recording, with the six moments marked. Bottom right: pairs that lit up together at two or more gray-screen moments (blue) and pairs that lit up together only during gratings (green). bPCA measures the blue network and the spiking noise, and returns green.",
+        handoff="The blue network, assembled from gray-screen moments, is the <b class=\"blue\">redundancy baseline</b>; the green edges are what bPCA ranks; the <b class=\"red\">noise baseline</b> is a dot that flickers on alone.",
+        strengths=[
+            "The most self-explanatory of all the drafts: a passer-by can rebuild the network from the frames, and “together, repeatedly” is exactly what the covariance of binned counts measures.",
+            "The Hebbian slogan is a hook every neuroscientist knows, and the twist (the wiring is there without a stimulus) is the message.",
+        ],
+        risks=[
+            "“Wire together” may suggest synaptic plasticity; say “edge”, not “wire”, in the body text.",
+            "The lit sets are Poisson-noisy, which is realistic, but a passer-by may count mismatches. Six frames plus a raster is wide; it fits the slot only with small frames.",
+        ],
+    ),
+    dict(
+        n="1e", file="option1e-arcs.svg", frame="Arcs over the raster",
+        pitch="The network, drawn on the data",
+        reads=[
+            "Panels (a) and (b) are the two rasters of 1c, but the network is drawn directly on them: an arc joins two rows whose rates are correlated. On the gray screen the arcs form two bundles.",
+            "During gratings the bundles stay and new arcs appear among the four bottom rows.",
+            "Panel (c) removes the raster and keeps the arcs: blue for the gray screen, green for what the grating added.",
+        ],
+        lead="As 1c: correlate every unit with every other unit and the recording becomes a network. On a gray screen it already has two bundles of arcs; the grating adds a third.",
+        caption="(a) Gray screen: spikes of 14 units, with an arc joining each pair whose rates are correlated (r > 0.35). (b) The same during drifting gratings. (c) The arcs alone: present on the gray screen (blue) and added by the grating (green). PCA returns the blue bundles; bPCA measures them and the spiking noise, and returns green.",
+        handoff="The blue arcs are the <b class=\"blue\">redundancy baseline</b>, the green arcs what bPCA ranks, and the <b class=\"red\">noise baseline</b> the counting jitter in every row.",
+        strengths=[
+            "One picture holds the data and the network, and it is compact enough to share the slot with text.",
+            "“Same rows, more arcs” is obvious at a glance.",
+        ],
+        risks=[
+            "Arc diagrams are less familiar than node-link drawings.",
+            "Chance correlations produce stray long arcs (one in (a)) that need pruning or a word of explanation.",
+        ],
+    ),
+]
+
 TABLE = [
     ("1 Networks", "“functional connectivity”", "the recording is two networks plus noise; PCA picks the bigger", "spontaneous network / spiking noise", "high", "reads as a connectivity method"),
+    ("1b Zoom", "“an edge is a correlation”", "the whole system, and one pair opened up", "pair scatter on gray screen / dot jitter", "medium", "busy"),
+    ("1c Raster to network", "“that's my raster”", "gray screen already has blocks; the grating adds one", "matrix (b) is Σ²ᵣ", "medium", "seven panels"),
+    ("1d Flipbook", "“fire together, wire together”", "units that light up together get an edge, stimulus or not", "blue network / lone flicker", "high", "slogan suggests plasticity"),
+    ("1e Arcs", "“network on the raster”", "same rows, more arcs", "blue arcs / noise", "medium", "unfamiliar drawing"),
     ("2 State space", "“noise-correlation scatter”", "PC1 is the shared gain; the stimulus is across it", "blue ellipse / red disc", "low", "the standard cartoon"),
     ("3 ΔF/F", "“that's ΔF/F”", "λ − 1 is ΔF/F for covariance", "F₀ / dark frame", "medium", "does not show why PCA fails"),
     ("4 Control", "“where is the control?”", "the baselines are already in the session", "control 1 / control 2", "low", "not a picture of the problem"),
@@ -167,6 +258,8 @@ header { display: grid; gap: 14px; padding-block: 8px 28px; border-bottom: 1px s
 nav { display: flex; flex-wrap: wrap; gap: 8px; }
 nav a { text-decoration: none; color: var(--fg); background: var(--chip); border-radius: 999px; padding: 6px 14px; font-size: 0.95rem; font-weight: 600; }
 nav a:hover, nav a:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+nav a.sub { font-weight: 400; }
+section.variant { padding-left: 16px; border-left: 3px solid var(--line); }
 .jobs { display: grid; gap: 8px; padding-left: 1.3em; margin: 0; }
 section.option { display: grid; gap: 22px; padding-block: 36px; border-bottom: 1px solid var(--line); }
 .head { display: grid; gap: 6px; }
@@ -194,14 +287,15 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 """
 
 
-def section(o):
+def section(o, variant=False):
     reads = "".join(f"<li>{r}</li>" for r in o["reads"])
     strengths = "".join(f"<li>{r}</li>" for r in o["strengths"])
     risks = "".join(f"<li>{r}</li>" for r in o["risks"])
+    eyebrow = f"Variant {o['n']} of Option 1 \u00b7 {o['frame']}" if variant else f"Option {o['n']} \u00b7 {o['frame']}"
     return f"""
-<section class="option" id="option-{o['n']}">
+<section class="option{' variant' if variant else ''}" id="option-{o['n']}">
   <div class="head">
-    <span class="eyebrow">Option {o['n']} · {o['frame']}</span>
+    <span class="eyebrow">{eyebrow}</span>
     <h2>{o['pitch']}</h2>
     <p class="frame">Proposed subtitle for the Section 1 header bar.</p>
   </div>
@@ -229,7 +323,13 @@ def section(o):
 
 def main(out):
     rows = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in TABLE)
-    nav = "".join(f'<a href="#option-{o["n"]}">{o["n"]}. {o["frame"]}</a>' for o in OPTIONS)
+    nav = "".join(f'<a href="#option-{o["n"]}">{o["n"]}. {o["frame"]}</a>' for o in OPTIONS[:1])
+    nav += "".join(f'<a href="#option-{v["n"]}" class="sub">{v["n"]}. {v["frame"]}</a>' for v in VARIANTS)
+    nav += "".join(f'<a href="#option-{o["n"]}">{o["n"]}. {o["frame"]}</a>' for o in OPTIONS[1:])
+    body_sections = (section(OPTIONS[0])
+                     + f'<section class="rec" id="variants"><h2>Option 1, made explicit</h2><p class="col">{VARIANTS_INTRO}</p></section>'
+                     + "".join(section(v, variant=True) for v in VARIANTS)
+                     + "".join(section(o) for o in OPTIONS[1:]))
     html = f"""<title>Five Poster Openings</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap">
@@ -249,7 +349,7 @@ def main(out):
   </div>
   <nav>{nav}</nav>
 </header>
-{"".join(section(o) for o in OPTIONS)}
+{body_sections}
 <section class="rec" id="compare">
   <h2>Side by side</h2>
   <div class="tablewrap"><table>
@@ -261,7 +361,7 @@ def main(out):
   <h2>Recommendation</h2>
   <div class="col" style="display:grid;gap:12px">
     <p>Use <b>Option 2 as the figure</b>, with <b>Option 4 reduced to a one-line strip</b> under it saying where the three inputs come from. It is the picture neuroscientists already use to think about population coding, so there is nothing to translate; it previews Section 3's panels (f)–(h), so the poster reads as one story from column 1 to column 2; and the headline numbers (31° to 9°) can sit in the opening. Then borrow Option 3's gloss for Section 2's equation (“λ − 1 is ΔF/F for covariance, one direction at a time”), the quickest way to make the eigenvalue mean something.</p>
-    <p>If standing out from the aisle matters more than the shortest path to understanding, <b>Option 1</b> is the better figure: it is the only one a passer-by has not seen before, and its hand-off (“the spontaneous network”, “the spiking noise”) is just as clean. Keep Option 2's panel (c) in Section 2, where it already lives, so the geometry still appears.</p>
+    <p>If the whole-system view matters more, take the network family. Among its variants, <b>1c</b> is the safest (every element is a real analysis object, and its matrices are literally Σ²ᵣ and Σ²), <b>1d</b> is the most memorable and the only one that teaches what an edge means without a scatter plot or a matrix, <b>1b</b> is the best bridge to the state-space picture, and <b>1e</b> is the most compact. If the opening is to be a network, use <b>1d</b> as the figure, with its slogan as the header subtitle, and reuse 1c's matrices (b) and (e) beside Section 2's equation, where they become Σ²ᵣ and Σ² without renaming. Keep Option 2's panel (c) in Section 2, where it already lives, so the two-neuron geometry still appears once.</p>
     <p>By audience: mostly systems electrophysiology, Option 2; mostly imaging, Option 3; a crowd that asks “do I need new data?”, Option 4; neighbours presenting spontaneous activity, Option 5.</p>
     <p>Hybrids that fit the slot:</p>
     <ul>

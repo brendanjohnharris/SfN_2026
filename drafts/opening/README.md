@@ -4,9 +4,10 @@ Drafts for the first column of `SfN_2026.svg`: five different framings of the pr
 own schematic, lead text, caption, and hand-off to Section 2. Nothing here is wired into the poster yet.
 
 Files: `optionN-*.svg` (1460 x 780 poster units, drawn to drop into the Section 1 figure slot at
-k = 0.93), `preview/optionN-*.png` (renders), `make_drafts.py` + `svgkit.py` (generator),
-`render.js` (SVG to PNG with the pre-installed Playwright Chromium). Regenerate with
-`python3 make_drafts.py && node render.js preview 1 option*.svg`.
+k = 0.93), `preview/optionN-*.png` (renders), `make_drafts.py` + `svgkit.py` (generator for options
+1–5), `make_variants.py` (the four network variants 1b–1e, from simulated spikes), `render.js` (SVG
+to PNG with the pre-installed Playwright Chromium), `build_page.py` (the comparison page).
+Regenerate with `python3 make_drafts.py && python3 make_variants.py && node render.js preview 1 option*.svg`.
 
 ## What the opening has to do
 
@@ -86,6 +87,196 @@ walk away thinking bPCA is a connectivity method. Saying "co-fluctuation network
 text, and colouring nodes rather than edges in (e) and (f), limits this. Six panels is dense for the
 slot: at poster size the explanatory sentences in (e) and (f) should move to the caption box, leaving
 one short line each.
+
+---
+
+## Option 1, made explicit: four variants where an edge is visibly a correlation
+
+The network in Option 1 is drawn by hand, so nothing in it says what a line *is*. These four variants
+keep the whole-system view but build the network from spiking data, so the reader can see that an
+edge joins two units whose firing rates rise and fall together.
+
+All four come from one simulated population (`make_variants.py`): 14 units, 12 s at 50 ms bins,
+Poisson spikes. Units 1–10 belong to two spontaneous groups that share a hub unit, each group driven
+by its own slow fluctuation (arousal, running). Units 11–14 are a module tuned to grating direction;
+two of them also lean weakly on the first group, so the same neurons carry both. Correlations are
+Pearson r between rates in 150 ms windows, and an edge is drawn where r > 0.35. Change the seed or
+the thresholds at the bottom of `make_variants.py` and rerun to get a different draw.
+
+### 1b. An edge, exploded into the pair's data
+
+![Option 1b](preview/option1b-zoom.png)
+
+**Subtitle:** *An edge is two units whose rates rise and fall together*
+
+**How it reads.**
+
+1. Panel (a) is the network, now in its true colours: two blue groups (correlated with nothing on the
+   screen) and a green module (correlation the grating adds). A magnifier sits on one blue edge and
+   one green edge.
+2. Panel (b) opens the blue edge. The two units' rates over 12 s of gray screen bump at the same
+   moments, and their rates in 200 ms windows, plotted against each other, make a tilted cloud:
+   r = 0.88. That is all an edge is.
+3. Panel (c) opens the green edge. During gratings the two units burst under the stimulus bars, and
+   the scatter, coloured by direction, pulls the four directions apart; the windows with no grating
+   (grey) sit near the origin. A green edge is covariance the grating creates, and it carries the
+   direction.
+
+**Lead text:**
+
+> Draw a line between any two units whose firing rates rise and fall together, and a population
+> recording becomes a network. Most of its lines are there with nothing on the screen: shared
+> inputs, arousal, running. The grating adds a few more, among the units it drives. PCA, which ranks
+> directions by total variance, returns the biggest cluster of lines, which is not the stimulus.
+
+**Caption:**
+
+> (a) Units linked when their rates are correlated: blue on the gray screen, green only during
+> gratings. (b) One blue edge: the pair's rates on the gray screen and their joint distribution
+> (r = 0.88). (c) One green edge: the pair's rates during gratings, and their joint distribution
+> coloured by direction (crosses: class means; grey: no grating). The recording draws every edge in
+> black. bPCA measures the blue network and the spiking noise, and ranks what the grating adds.
+
+**Hand-off to Section 2.** Panel (b) is the redundancy baseline seen for one pair; the ellipse of
+(c) beyond the ellipse of (b) is what bPCA ranks; the noise baseline is the jitter of each dot that
+would remain if the rates were held fixed. Panel (c) is also Section 3's panel (g) for two units.
+
+**Strengths.** Answers "what is an edge?" with the plot every electrophysiologist uses, and merges
+Option 1 (the whole system) with Option 2 (one pair). The green scatter previews the decoding result.
+
+**Risks.** The busiest of the network variants: two callouts compete with the network, and at poster
+scale they need the full slot height. The magnified pairs must be chosen so their traces look clean.
+
+### 1c. Spike raster, correlation matrix, network
+
+![Option 1c](preview/option1c-raster.png)
+
+**Subtitle:** *Correlations that are there with nothing on the screen*
+
+**How it reads.**
+
+1. Panel (a) is a raster of 14 units on the gray screen. Dense vertical bands show groups of units
+   firing together, at moments that have nothing to do with a stimulus.
+2. Panel (b) is the correlation matrix of their rates. The two bands become two blocks (units 1–6
+   and 6–10, sharing unit 6).
+3. Panel (c) draws the matrix as a network: an edge wherever r > 0.35. Two clusters, and that is
+   everything the matrix said.
+4. Panels (d)–(f) repeat this during gratings. The bands are still there, units 11–14 now burst at
+   every grating, the matrix gains a third block, and the network gains a clique, drawn in black like
+   every other edge because the recording does not label them.
+5. Panel (g) keeps only the edges of (f) that are not in (c): the few units that fire together only
+   when the grating is on.
+
+**Lead text:**
+
+> Correlate every unit with every other unit and a recording becomes a matrix, and the matrix a
+> network. On a gray screen the matrix already has blocks: groups of units that rise and fall
+> together under shared inputs, arousal and running. A grating adds one block more. PCA diagonalises
+> the whole matrix, so its leading components are the biggest blocks, which were there without the
+> stimulus.
+
+**Caption:**
+
+> (a)–(c) Gray screen: spike raster, correlation matrix of the rates, and the matrix as a network
+> (edge where r > 0.35). (d)–(f) The same during drifting gratings (bars: direction). (g) Edges
+> present in (f) but not in (c). PCA on (e) returns the large blocks, the spontaneous correlations.
+> bPCA measures (b) and the spiking noise, and returns (g).
+
+**Hand-off to Section 2.** Matrix (b) *is* the redundancy baseline Σ²ᵣ and matrix (e) is Σ²; nothing
+is renamed. The noise baseline is what each unit's diagonal entry holds beyond the trend of its
+neighbouring lags (Section 3's nugget), so Section 3's noise box follows naturally.
+
+**Strengths.** Nothing is metaphorical: the raster is the data, the matrix is the covariance that
+PCA and bPCA actually consume, and the network is only the matrix thresholded. The block structure
+explains "redundancy" even to a physicist. Panel (g) is the stimulus-engaged subspace as a picture.
+
+**Risks.** Seven panels. For matrix-literate readers the network adds little over the matrix.
+Rasters print badly when small: at poster scale the bins must stay at least a point wide.
+
+### 1d. Units that light up together get an edge (flipbook)
+
+![Option 1d](preview/option1d-flipbook.png)
+
+**Subtitle:** *Fire together, wire together, even with nothing on the screen*
+
+**How it reads.**
+
+1. Six snapshots of the same 14 units at six moments of one recording; a filled dot is a unit firing
+   in that half second. At the gray-screen moments one group lights up together, or the other. At
+   the grating moments a different group of four lights up.
+2. The raster underneath shows where the six moments sit, so the snapshots are visibly taken from the
+   data.
+3. On the right, every pair that lit up together in two or more gray-screen moments gets a blue
+   edge; pairs that lit up together only during gratings get a green one. The network is assembled in
+   front of the reader.
+
+**Lead text:**
+
+> Watch a population for a few seconds and the same groups of units keep lighting up together, with
+> nothing on the screen. Link every pair that does, and you have a network that owes nothing to the
+> stimulus. A grating lights up one more group. PCA ranks directions by total variance, so its leading
+> component is the group that lights up most, not the one the grating drives.
+
+**Caption:**
+
+> Top: six moments of one recording (filled: units firing in that 0.5 s; green frames fall during a
+> grating). Bottom left: the recording, with the six moments marked. Bottom right: pairs that lit up
+> together at two or more gray-screen moments (blue) and pairs that lit up together only during
+> gratings (green). bPCA measures the blue network and the spiking noise, and returns green.
+
+**Hand-off to Section 2.** The blue network, assembled from gray-screen moments, is the redundancy
+baseline; the green edges are what bPCA ranks; the noise baseline is a dot that flickers on alone.
+
+**Strengths.** The most self-explanatory of all the drafts: a passer-by can rebuild the network from
+the frames, and "together, repeatedly" is exactly what the covariance of binned counts measures.
+The Hebbian slogan is a hook every neuroscientist knows, and the twist (the wiring is there without
+a stimulus) is the message.
+
+**Risks.** "Wire together" may suggest synaptic plasticity; say "edge", not "wire", in the body text.
+The lit sets are Poisson-noisy, which is realistic, but a passer-by may count mismatches. Six frames
+plus a raster is wide; it fits the slot only with small frames.
+
+### 1e. Arcs over the raster
+
+![Option 1e](preview/option1e-arcs.png)
+
+**Subtitle:** *The network, drawn on the data*
+
+**How it reads.**
+
+1. Panels (a) and (b) are the two rasters of 1c, but the network is drawn directly on them: an arc
+   joins two rows whose rates are correlated. On the gray screen the arcs form two bundles.
+2. During gratings the bundles stay and new arcs appear among the four bottom rows.
+3. Panel (c) removes the raster and keeps the arcs: blue for the gray screen, green for what the
+   grating added.
+
+**Lead text:** as 1c.
+
+**Caption:**
+
+> (a) Gray screen: spikes of 14 units, with an arc joining each pair whose rates are correlated
+> (r > 0.35). (b) The same during drifting gratings. (c) The arcs alone: present on the gray screen
+> (blue) and added by the grating (green). PCA returns the blue bundles; bPCA measures them and the
+> spiking noise, and returns green.
+
+**Strengths.** One picture holds the data and the network, and it is compact enough to share the slot
+with text. "Same rows, more arcs" is obvious at a glance.
+
+**Risks.** Arc diagrams are less familiar than node-link drawings. Chance correlations produce stray
+long arcs (one in (a)) that need pruning or a word of explanation.
+
+### Choosing among the network variants
+
+- **1c** is the safest: every element is a real analysis object, and its matrices are literally
+  Σ²ᵣ and Σ². Best for an electrophysiology crowd.
+- **1d** is the most memorable and the only one that teaches what an edge means without a scatter
+  plot or a matrix. Best if the network has to carry the whole column on its own.
+- **1b** is the best bridge to the state-space picture (Option 2) and to Section 3's scatter panels.
+- **1e** is the most compact, at the cost of an unfamiliar drawing.
+
+If the opening is to be a network, use **1d** as the figure, with its slogan as the header subtitle,
+and reuse 1c's two matrices (b) and (e) beside Section 2's equation, where they become Σ²ᵣ and Σ²
+without renaming.
 
 ---
 
@@ -297,6 +488,10 @@ premise is familiar, the figure is the least surprising of the five.
 | | First thought | Teaches in ten seconds | Sets up Section 2 words as | Visual novelty | Main risk |
 |---|---|---|---|---|---|
 | 1 Networks | "functional connectivity" | the recording is two networks plus noise; PCA picks the bigger | spontaneous network / spiking noise | high | reads as a connectivity method |
+| 1b Zoom | "an edge is a correlation" | the whole system, and one pair opened up | pair scatter on gray screen / dot jitter | medium | busy |
+| 1c Raster to network | "that's my raster" | gray screen already has blocks; the grating adds one | matrix (b) is Σ²ᵣ | medium | seven panels |
+| 1d Flipbook | "fire together, wire together" | units that light up together get an edge, stimulus or not | blue network / lone flicker | high | slogan suggests plasticity |
+| 1e Arcs | "network on the raster" | same rows, more arcs | blue arcs / noise | medium | unfamiliar drawing |
 | 2 State space | "noise-correlation scatter" | PC1 is the shared gain; the stimulus is across it | blue ellipse / red disc | low | the standard cartoon |
 | 3 ΔF/F | "that's ΔF/F" | λ − 1 is ΔF/F for covariance | F₀ / dark frame | medium | does not show why PCA fails |
 | 4 Control | "where is the control?" | the baselines are already in the session | control 1 / control 2 | low | not a picture of the problem |
@@ -311,10 +506,10 @@ poster reads as one story from column 1 to column 2; and the headline numbers (3
 the opening. Then borrow Option 3's gloss for Section 2's equation ("λ − 1 is ΔF/F for covariance,
 one direction at a time"), which is the quickest way to make the eigenvalue mean something.
 
-If standing out from the aisle matters more than the shortest path to understanding, **Option 1** is
-the better figure: it is the only one of the five a passer-by has not seen before, and its
-hand-off ("the spontaneous network" and "the spiking noise") is just as clean. In that case keep
-Option 2's panel (c) in Section 2, where it already lives, so the geometry still appears.
+If the whole-system view matters more, which is the case Brendan made after the first round, take
+the network family: **1d** as the figure (the slogan as subtitle, the frames teaching what an edge
+is), with 1c's matrices reused beside Section 2's equation. Keep Option 2's panel (c) in Section 2,
+where it already lives, so the two-neuron geometry still appears once.
 
 A decision rule by audience: mostly systems electrophysiology, Option 2; mostly imaging, Option 3;
 a crowd that asks "do I need new data?", Option 4; neighbours presenting spontaneous activity,
