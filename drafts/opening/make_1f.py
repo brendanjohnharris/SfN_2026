@@ -24,7 +24,7 @@ INK = "#2b2f36"          # outlines, as in the Makie figures
 PLATE = "#f3f4f6"        # sheet face
 PLATE_EDGE = "#b9bec5"   # sheet thickness
 CELL = "#e4e7ea"         # resting cell fill
-SHEAR, SQUASH = 0.55, 0.5
+SHEAR, SQUASH = 0.3, 0.72
 SHEET_W, SHEET_H = 380, 230
 
 
@@ -44,13 +44,13 @@ def plate(s, ox, oy, k, thickness=7):
     return top
 
 
-def glow(s, x, y, color, uid, rx=24, ry=13):
+def glow(s, x, y, color, uid, rx=24, ry=18):
     s.defs.append(f'<radialGradient id="g{uid}"><stop offset="0" stop-color="{color}" stop-opacity="0.38"/>'
                   f'<stop offset="1" stop-color="{color}" stop-opacity="0"/></radialGradient>')
     s.add(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{rx}" ry="{ry}" style="fill:url(#g{uid});stroke:none"/>')
 
 
-def cell(s, x, y, fill=CELL, rx=8.5, ry=5.2, sw=1.2):
+def cell(s, x, y, fill=CELL, rx=8.5, ry=6.4, sw=1.2):
     """A cell body lying on the sheet: a foreshortened ellipse with an ink outline."""
     s.add(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{rx}" ry="{ry}" style="fill:{fill};stroke:{INK};stroke-width:{sw}"/>')
 
@@ -168,7 +168,7 @@ def option1f():
     s.text(bx + 60, by + 66, "still present", size=18, fill=GREY, anchor="middle")
     for n in spont:
         thin_arrow(s, bx + 8, by + 44, P[n][0] + 8, P[n][1] - 7, "#8e96a3", sw=1.2, head=6, bend=-8, opacity=0.5)
-    s.text(430, 318, "co-active cells, linked", size=20, fill=GREY)
+    s.text(430, 346, "co-active cells, linked", size=20, fill=GREY)
 
     # ---- (b) gray screen ------------------------------------------------------------------------
     s.rich(30, 430, [("(b)", {"weight": 700}), ("  Gray screen", {"weight": 700})], size=34)
@@ -184,7 +184,7 @@ def option1f():
     s.text(bx + 60, by + 110, "many cells", size=18, fill=BLUE, weight=600, anchor="middle")
     for n in spont:
         thin_arrow(s, bx + 8, by + 44, P2[n][0] + 8, P2[n][1] - 7, BLUE, sw=1.4, head=7, bend=-8, opacity=0.8)
-    s.rich(430, 668, [("redundant", {"fill": BLUE, "weight": 700}), (" links: a subset of the cells in (a)", {"fill": GREY})], size=20)
+    s.rich(430, 696, [("redundant", {"fill": BLUE, "weight": 700}), (" links: a subset of the cells in (a)", {"fill": GREY})], size=20)
 
     # ---- the question ---------------------------------------------------------------------------
     s.line(940, 250, 972, 395, stroke=INK, sw=1.6)
@@ -195,12 +195,12 @@ def option1f():
     s.text(984, 462, "the grating add?", size=18, fill=GREY)
 
     # ---- (c) stimulus-engaged -----------------------------------------------------------------
-    s.rich(1035, 292, [("(c)", {"weight": 700}), ("  Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=34)
+    s.rich(1080, 292, [("(c)", {"weight": 700}), ("  Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=34)
     e_c = knn_edges(cells, stim, 2)
-    sheet(s, 1035, 330, 0.8, cells, set(stim), GREEN, e_c, "c", dim_inactive=True)
-    s.text(1045, 492, "the links in (a) that are not in (b)", size=20, fill=GREY)
-    s.rich(1045, 524, [("bPCA: variance in (a) ", {"fill": GREY}), ("relative to (b)", {"fill": BLUE, "weight": 600}), (",", {"fill": GREY})], size=20)
-    s.rich(1045, 552, [("above the ", {"fill": GREY}), ("spiking noise", {"fill": RED, "weight": 600}), (", per direction", {"fill": GREY})], size=20)
+    sheet(s, 1080, 330, 0.75, cells, set(stim), GREEN, e_c, "c", dim_inactive=True)
+    s.text(1090, 500, "the links in (a) that are not in (b)", size=20, fill=GREY)
+    s.rich(1090, 532, [("bPCA: variance in (a) ", {"fill": GREY}), ("relative to (b)", {"fill": BLUE, "weight": 600}), (",", {"fill": GREY})], size=20)
+    s.rich(1090, 560, [("above the ", {"fill": GREY}), ("spiking noise", {"fill": RED, "weight": 600}), (", per direction", {"fill": GREY})], size=20)
     s.save(os.path.join(HERE, "option1f-construction.svg"), "Option 1f: the construction, as sheets of neurons")
 
 
