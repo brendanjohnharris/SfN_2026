@@ -275,25 +275,31 @@ long arcs (one in (a)) that need pruning or a word of explanation.
 This is the version that carries the construction rather than only the problem, built from
 Brendan's description after the first round: the stimulus manifold feeding the network, the gray
 screen pumping a different set that is visibly a subset of the first, and a question-mark arrow to
-the extraction. The networks sit on oblique sheets (shear 0.5, squash 0.6 in `make_1f.py`), which
-saves height and makes the three pictures read as the same population seen three times.
+the extraction. It is drawn in the conventions of the Cosyne 2025, OHBM 2025 and MiB 2026 posters:
+the population is an oblique plate with a visible edge (the MiB "population bath"), neurons are
+small flattened cell glyphs with an ink outline rather than uniform circles, activity is a soft
+glow, arrows are thin with small heads and carry a semantic colour, the stimuli are real-looking
+grating patches with a drift arrow, the shared input is a trace in a small frame, and the only text
+inside the figure is a bold panel letter and a few short labels. No grey card backgrounds; the
+poster's grey boxes hold the prose.
 
 **How it reads.**
 
-1. Panel (a): the stimulus set is a line of directions, drawn as a curve with four gratings on it.
-   Each grating drives a different unit on the sheet (coloured arrows), so the driven group reads
-   four different points of the line: these units carry information about the stimulus. The shared
-   input is still running in the background (faint box, faint arrows) and lights its own group.
-   Units that fire together get strong links, and all eleven lit units look the same in the
-   recording, so they are drawn in one colour.
-2. Panel (b): the gray screen. Nothing on the manifold, but one shared signal (arousal, running)
-   pumps seven units, and each lit unit shows a copy of the same trace in an inset. The copies are
-   the redundancy cue: seven units, one number. Their links are blue, and the seven are a subset of
-   the eleven in (a).
-3. The arrow with the question mark asks for (a) minus (b). Panel (c) is the answer the reader
-   wants: the four units and six links the grating added. The subtraction is only the intuition,
-   and the panel says so: Baseline PCA does the contrast on covariance, relative to (b), after
-   removing the spiking noise.
+1. Panel (a): four grating patches recede along a slanted line, the line of directions. Each
+   patch sends a thin arrow in its direction colour onto a sheet of 36 cells and lands on a
+   different cell, so the driven group reads four different points of the line: these cells carry
+   information about the stimulus. A grey "shared input, still present" trace fans faint arrows onto
+   its own group at the right of the sheet. Co-active cells are linked (each to its nearest co-active
+   neighbours) and all lit cells are drawn in one dark colour, because the recording does not label
+   them.
+2. Panel (b): the gray screen, a plain grey patch where the gratings were. Nothing drives the
+   left of the sheet, but the shared-input trace, now in blue, fans nine arrows onto one group of
+   cells. The fan is the redundancy cue, in the shape the MiB mean-field figure uses: one signal,
+   many cells. Their links are blue and they are a subset of the cells lit in (a).
+3. The arrow with the question mark asks which links the grating added. Panel (c) is the answer
+   the reader wants: the five cells and their links, in green, on the same sheet with every other
+   cell dimmed. The caption says that Baseline PCA does the contrast on covariance, relative to (b),
+   after removing the spiking noise.
 
 **Lead text:**
 
@@ -305,26 +311,28 @@ saves height and makes the three pictures read as the same population seen three
 
 **Caption:**
 
-> (a) Drifting gratings: a line of directions feeds a sheet of 16 units. Each grating drives one unit
-> most (coloured arrows) and the shared input keeps driving its group (faint). Eleven units fire,
-> and co-active units are linked. (b) Gray screen: the shared input alone lights seven units, each a
-> copy of one signal (insets): redundant links, and a subset of (a). (c) Which units and links did
-> the grating add? Subtracting the pictures is the idea; Baseline PCA measures the variance in (a)
-> relative to (b), above the spiking noise, one direction at a time.
+> (a) Drifting gratings: a line of directions feeds a sheet of cells. Each grating drives one cell
+> most (coloured arrows) and the shared input keeps driving its own group (grey). Co-active cells
+> are linked. (b) Gray screen: the shared input alone drives one group of cells, one signal fanned
+> to many: redundant links, and a subset of the cells in (a). (c) Which links did the grating add?
+> Subtracting the pictures is the idea; Baseline PCA measures the variance in (a) relative to (b),
+> above the spiking noise, one direction at a time.
 
 **Hand-off to Section 2.** Panel (b) is the redundancy baseline by name and by picture: one signal
-measured seven times. The noise baseline enters in (c) as what is removed before the contrast. The
-word "redundancy" in Section 2 is then already defined as "copies of one signal", which is also what
-the paper's seven cameras meant.
+measured nine times. The noise baseline enters in (c) as what is removed before the contrast. The
+word "redundancy" in Section 2 is then already defined as "one signal, many cells", which is also
+what the paper's seven cameras meant.
 
-**Strengths.** It carries the construction, not only the complaint: manifold to tuned units to links,
-shared input to copies to links. The subset relation is visible, the question is explicit, and the
-tilted sheets save height. The copies-of-one-trace insets make redundancy a thing you can see.
+**Strengths.** It carries the construction, not only the complaint: manifold to tuned cells to
+links, shared input to a fan of cells to links. The subset relation is visible, the question is
+explicit, and the plates save height. The drawing conventions match the other posters, so it will
+sit beside the Makie figures without looking imported.
 
-**Risks.** Panel (a) is dense, with two inputs. "(a) − (b)" suggests a difference of covariance
-matrices, which is cPCA, not bPCA; the caption's last sentence has to carry the correction. Direction
-is a circle (0 to 360°), drawn here as a line. The insets must stay at least 40 poster units wide to
-be read as identical.
+**Risks.** Panel (a) is the densest, with two inputs. The question mark invites "(a) minus (b)",
+which is a difference of covariance matrices, that is cPCA, not bPCA; the caption's last sentence
+has to carry the correction. Direction is a circle (0 to 360°), drawn here as a line. The thin
+arrows and 1 px glyph outlines need checking at print size (the figure is placed at k = 0.93, so a
+1.2 px outline becomes about 1.1 poster units; the Makie figures use similar weights).
 
 ### Choosing among the network variants
 
