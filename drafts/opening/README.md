@@ -289,9 +289,9 @@ poster's grey boxes hold the prose.
    patch sends a thin arrow in its direction colour onto a sheet of 36 cells and lands on a
    different cell, so the driven group reads four different points of the line: these cells carry
    information about the stimulus. A grey "shared input, still present" trace fans faint arrows onto
-   its own group at the right of the sheet. Co-active cells are linked (each to its nearest co-active
-   neighbours) and all lit cells are drawn in one dark colour, because the recording does not label
-   them.
+   its own group, which interleaves with the driven one and shares two cells with it. Co-active
+   cells are linked (each to its nearest co-active neighbours, across the groups), so the twelve lit
+   cells read as one network, drawn in one dark colour, because the recording does not label them.
 2. Panel (b): the gray screen, a plain grey patch where the gratings were. Nothing drives the
    left of the sheet, but the shared-input trace, now in blue, fans nine arrows onto one group of
    cells. The fan is the redundancy cue, in the shape the MiB mean-field figure uses: one signal,

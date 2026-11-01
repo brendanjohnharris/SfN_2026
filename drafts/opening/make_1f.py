@@ -130,19 +130,19 @@ def option1f():
     rng = np.random.default_rng(12)
     s = SVG()
     # ---- the population: a jittered grid of 36 cells on a 380 x 230 sheet -----------------------
-    cells = []
+    cells, index = [], {}
     for j in range(5):
         for i in range(7):
-            if (i, j) in ((3, 0), (6, 4), (0, 4)):     # leave a few gaps so it is not a lattice
+            if (i, j) in ((6, 0), (0, 4), (6, 4)):     # leave a few gaps so it is not a lattice
                 continue
             u = 28 + i * 54 + rng.uniform(-9, 9)
             v = 24 + j * 46 + rng.uniform(-8, 8)
+            index[(i, j)] = len(cells)
             cells.append((u, v))
-    order_u = sorted(range(len(cells)), key=lambda n: cells[n][0])
-    stim = [n for n in order_u[:11] if 20 < cells[n][1] < 215][:5]            # five cells at the left
-    spont = [n for n in order_u[-16:] if cells[n][1] > 10][:9]                 # nine cells at the right
-    by_row = sorted(stim, key=lambda n: -cells[n][1])                             # lowest on the sheet first
-    pref = dict(zip((0, 45, 90, 135), by_row[:4]))                               # bottom grating -> lowest cell: no crossings
+    # The two groups interleave and share two cells, so the lit set in (a) reads as one network.
+    spont = [index[c] for c in ((2, 1), (3, 1), (4, 0), (4, 2), (5, 1), (5, 3), (3, 3), (4, 4), (6, 2))]
+    stim = [index[c] for c in ((1, 2), (2, 2), (2, 4), (3, 1), (3, 3))]      # (3,1) and (3,3) are in both
+    pref = {0: index[(2, 4)], 45: index[(3, 3)], 90: index[(2, 2)], 135: index[(3, 1)]}   # bottom grating -> lowest cell
     k = 0.92
     sig = smooth_noise(90, rng, cutoff=0.1)
     sig = sig / np.abs(sig).max()
@@ -150,7 +150,7 @@ def option1f():
     # ---- (a) drifting gratings ----------------------------------------------------------------
     s.rich(30, 60, [("(a)", {"weight": 700}), ("  Drifting gratings", {"weight": 700})], size=34)
     ox, oy = 270, 150
-    e_a = knn_edges(cells, stim, 2) + knn_edges(cells, spont, 3)
+    e_a = knn_edges(cells, sorted(set(stim) | set(spont)), 3)        # one co-active network, links crossing the groups
     P = sheet(s, ox, oy, k, cells, set(stim) | set(spont), DARK, e_a, "a")
     # the line of directions: four patches receding along a slanted line
     line = [(92, 330), (128, 268), (162, 210), (194, 156)]
@@ -196,7 +196,8 @@ def option1f():
 
     # ---- (c) stimulus-engaged -----------------------------------------------------------------
     s.rich(1080, 292, [("(c)", {"weight": 700}), ("  Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=34)
-    e_c = knn_edges(cells, stim, 2)
+    in_b = {(i, j) for i, j, _ in knn_edges(cells, spont, 3)}
+    e_c = [e for e in knn_edges(cells, stim, 2) if (e[0], e[1]) not in in_b]   # links in (a) that are not in (b)
     sheet(s, 1080, 330, 0.75, cells, set(stim), GREEN, e_c, "c", dim_inactive=True)
     s.text(1090, 500, "the links in (a) that are not in (b)", size=20, fill=GREY)
     s.rich(1090, 532, [("bPCA: variance in (a) ", {"fill": GREY}), ("relative to (b)", {"fill": BLUE, "weight": 600}), (",", {"fill": GREY})], size=20)
