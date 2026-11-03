@@ -25,7 +25,8 @@ relative to `karl:~/code` (= `/import/taiji1/bhar9988/code`, also reachable as `
 
 | Poster element(s) | Local file | Original | Made by |
 |---|---|---|---|
-| `s1-cameras` (col 1, cameras), `s2-baselines` (col 1, baselines) | `figures/src/Fig1_schematic.svg` | `LAB/plots/Fig1_schematic.svg` | `LAB/scripts/Fig1_schematic.jl` |
+| `s1-construction` (col 1, gratings / gray screen / stimulus-engaged sheets) | `figures/src/construction_poster.svg` | made in this repo | `drafts/opening/make_1f.py` (`option1f_vertical`), linked by `drafts/opening/link_construction.py` |
+| `s2-baselines` (col 1, baselines) | `figures/src/Fig1_schematic.svg` | `LAB/plots/Fig1_schematic.svg` | `LAB/scripts/Fig1_schematic.jl` |
 | `s3-raster`, `s3-cov` (col 2, panels (b) and (c), beside the brain) | `figures/src/trial_stack_covariance.svg` | `LAB/plots/trial_stack_covariance.svg` | `LAB/AllenNeuropixelsLab/scripts/trial_stack_covariance.jl` |
 | `s3-results` (col 2, decoding), `s4-results` (col 3, phantom oscillations) | `figures/src/Fig3_case_studies.svg` | `LAB/plots/Fig3_case_studies.svg` | `LAB/scripts/Fig3_case_studies.jl` (data: `LAB/scripts/calculations/neuropixels_data.jl`, `phantom_oscillations.jl`) |
 | `s3-noise` (col 2, noise-baseline box, panels (d) and (e)) | `figures/src/nugget_poster.svg` | `LAB/_research/neuropixels_nugget/nugget_poster.svg` | `LAB/_research/neuropixels_nugget/nugfig_poster.jl` (source data in `nugget_poster/`) |
@@ -36,7 +37,7 @@ relative to `karl:~/code` (= `/import/taiji1/bhar9988/code`, also reachable as `
 
 | Element | `data-crop` (x y w h) | Cover rects |
 |---|---|---|
-| `s1-cameras` | `208 30 472 270` | 3, over the source's (c), (d), (e); the poster draws its own (a)–(c) (label (a) nudged 14 px left, as the source's (c) abuts its title) |
+| `s1-construction` | `0 0 900 1050` (the whole file, at scale 1, placed at 110,1050) | none; the figure carries its own (a)–(c) |
 | `s2-baselines` | `42 330 630 382` | 5, over (f)–(j) (fill `#f5f5f5` in the grey boxes, white otherwise); the poster draws its own (a)–(e) |
 | `s3-results` | `168 16 552 246` | 1, over the source's row title |
 | `s4-results` | `163 548 557 252` | 2, over the row title and a stray letter |
@@ -51,8 +52,17 @@ The Fig1 slots are `s1-cameras` 160.5,1053.6,1460x779 and `s2-baselines` 150.5,2
 
 ### Per-source notes
 
+- **construction_poster** (900 x 1050, poster units). Drawn by `drafts/opening/make_1f.py`
+  (`python3 make_1f.py` from `drafts/opening/`; the same script writes the wide draft
+  `drafts/opening/option1f-construction.svg`). A 36-cell population on an oblique sheet (shear 0.3,
+  foreshortening 0.72), with a nine-cell spontaneous group and a five-cell grating-driven group that
+  share two cells; links join each active cell to its nearest active neighbours. Group memberships
+  are grid coordinates in `population()`. The Section 1 caption box sits to the right of the figure
+  (`s1-caption-box`, 1040,1050, 638 x 1050); `drafts/opening/link_construction.py` made the swap from
+  the cameras figure and holds the caption text. Fonts: Source Sans 3, panel labels 42 px.
 - **Fig1_schematic** (720 x 731). Generated on karl, by the script above (layout notes in its header).
-  The poster uses quadrants (c–e) and (f–j). Current copy rendered 2026-10-07 23:18 from the uncommitted
+  The poster uses quadrant (f–j) in Section 2; quadrant (c–e), the cameras, was the Section 1 figure
+  until 2026-11-03 (`s1-cameras`, crop `208 30 472 270`, three cover rects). Current copy rendered 2026-10-07 23:18 from the uncommitted
   working copy of the script (on top of commit `acf6da0`). The CairoMakie warning that `trail` is not supported is benign; the trails render.
 - **Section 3 layout.** Every figure in column 2 is drawn at Fig3's scale, k = 2.853 poster units per
   figure unit, so fonts and strokes agree across panels. Row 1 is (a) brain, (b) raster, (c) covariance,

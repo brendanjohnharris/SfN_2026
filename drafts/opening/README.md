@@ -334,6 +334,11 @@ has to carry the correction. Direction is a circle (0 to 360°), drawn here as a
 arrows and 1 px glyph outlines need checking at print size (the figure is placed at k = 0.93, so a
 1.2 px outline becomes about 1.1 poster units; the Makie figures use similar weights).
 
+**In the poster (2026-11-03).** 1f is the Section 1 figure, in a vertical layout with (c) below
+(a) and (b): `figures/src/construction_poster.svg`, 900 x 1050, written by `option1f_vertical()` in
+`make_1f.py` and linked as `s1-construction` by `link_construction.py`, which also moves the caption
+box beside the figure and holds the caption text.
+
 ### Choosing among the network variants
 
 - **1c** is the safest: every element is a real analysis object, and its matrices are literally

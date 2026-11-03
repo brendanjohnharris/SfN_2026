@@ -4,11 +4,14 @@ flattened cell glyphs, soft glows for activity, thin semantic-coloured arrows wi
 real-looking stimuli and traces, bold panel letters and almost no prose inside the figure.
 
 (a) A line of grating directions feeds a sheet of neurons; each grating drives a different cell
-    and the shared input keeps driving its own group. Co-active cells are linked.
+    and the shared input keeps driving its own, overlapping group. Co-active cells are linked.
 (b) The gray screen: one shared signal fans out to one group of cells (one signal, many copies).
 (?) Which links did the grating add?  (c) The stimulus-engaged set.
 
 Run from this folder:  python3 make_1f.py
+Writes option1f-construction.svg (the wide draft, 1460 x 780) and the poster figure
+../../figures/src/construction_poster.svg (vertical, 900 x 1050 poster units, linked from
+SfN_2026.svg as `s1-construction`).
 """
 
 import math
@@ -19,6 +22,7 @@ import numpy as np
 from svgkit import SVG, BLACK, BLUE, RED, GREEN, GREY, GREY_LIGHT, DARK, WHITE, DIRS, smooth_noise
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+POSTER_FIG = os.path.normpath(os.path.join(HERE, "..", "..", "figures", "src", "construction_poster.svg"))
 
 INK = "#2b2f36"          # outlines, as in the Makie figures
 PLATE = "#f3f4f6"        # sheet face
@@ -47,12 +51,12 @@ def plate(s, ox, oy, k, thickness=7):
 def glow(s, x, y, color, uid, rx=24, ry=18):
     s.defs.append(f'<radialGradient id="g{uid}"><stop offset="0" stop-color="{color}" stop-opacity="0.38"/>'
                   f'<stop offset="1" stop-color="{color}" stop-opacity="0"/></radialGradient>')
-    s.add(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{rx}" ry="{ry}" style="fill:url(#g{uid});stroke:none"/>')
+    s.add(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{rx:.1f}" ry="{ry:.1f}" style="fill:url(#g{uid});stroke:none"/>')
 
 
 def cell(s, x, y, fill=CELL, rx=8.5, ry=6.4, sw=1.2):
     """A cell body lying on the sheet: a foreshortened ellipse with an ink outline."""
-    s.add(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{rx}" ry="{ry}" style="fill:{fill};stroke:{INK};stroke-width:{sw}"/>')
+    s.add(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{rx:.1f}" ry="{ry:.1f}" style="fill:{fill};stroke:{INK};stroke-width:{sw}"/>')
 
 
 def thin_arrow(s, x1, y1, x2, y2, color, sw=1.8, head=9, bend=0.0, opacity=0.9):
@@ -69,7 +73,7 @@ def thin_arrow(s, x1, y1, x2, y2, color, sw=1.8, head=9, bend=0.0, opacity=0.9):
           f'style="fill:{color};stroke:none;opacity:{opacity}"/>')
 
 
-def grating(s, cx, cy, size, deg, uid, drift=True):
+def grating(s, cx, cy, size, deg, uid, drift=True, sw=1.6):
     """A drifting-grating patch: a rounded square filled with a sinusoid-like stripe gradient."""
     period = size / 3.2
     s.defs.append(
@@ -79,24 +83,24 @@ def grating(s, cx, cy, size, deg, uid, drift=True):
         f'<stop offset="1" stop-color="#2a2a2a"/></linearGradient>')
     h = size / 2
     s.add(f'<rect x="{cx - h:.1f}" y="{cy - h:.1f}" width="{size}" height="{size}" rx="{size * 0.12:.1f}" '
-          f'style="fill:url(#gr{uid});stroke:{INK};stroke-width:1.6"/>')
+          f'style="fill:url(#gr{uid});stroke:{INK};stroke-width:{sw}"/>')
     if drift:   # a small white arrow for the drift direction (perpendicular to the stripes)
         a = math.radians(deg)
         ex, ey = math.cos(a) * size * 0.28, math.sin(a) * size * 0.28
-        thin_arrow(s, cx - ex, cy - ey, cx + ex, cy + ey, WHITE, sw=2.2, head=7, opacity=0.95)
+        thin_arrow(s, cx - ex, cy - ey, cx + ex, cy + ey, WHITE, sw=2.2 * sw / 1.6, head=7 * sw / 1.6, opacity=0.95)
 
 
-def trace_box(s, x, y, w, h, sig, color, label, sublabel=None, stroke=INK):
+def trace_box(s, x, y, w, h, sig, color, label, sublabel=None, stroke=INK, size=21, subsize=18, sw=2):
     s.rect(x, y, w, h, fill=WHITE, stroke=stroke, sw=1.4, rx=3)
     n = len(sig)
     pts = [(x + 6 + i / (n - 1) * (w - 12), y + h / 2 - v * (h / 2 - 6)) for i, v in enumerate(sig)]
-    s.polyline(pts, stroke=color, sw=2)
-    s.text(x + w / 2, y - 8, label, size=21, weight=700, anchor="middle")
+    s.polyline(pts, stroke=color, sw=sw)
+    s.text(x + w / 2, y - 8, label, size=size, weight=700, anchor="middle")
     if sublabel:
-        s.text(x + w / 2, y + h + 22, sublabel, size=18, fill=GREY, anchor="middle")
+        s.text(x + w / 2, y + h + subsize + 4, sublabel, size=subsize, fill=GREY, anchor="middle")
 
 
-def knn_edges(pts, idx, kn=3):
+def knn_edges(pts, idx, kn=3, wmul=1.0):
     """Link each active cell to its nearest active neighbours (in sheet coordinates)."""
     edges = set()
     for i in idx:
@@ -106,30 +110,28 @@ def knn_edges(pts, idx, kn=3):
     out = []
     for i, j in edges:
         dist = math.dist(pts[i], pts[j])
-        out.append((i, j, 3.2 - 1.6 * min(dist / 140, 1)))
+        out.append((i, j, (3.2 - 1.6 * min(dist / 140, 1)) * wmul))
     return out
 
 
-def sheet(s, ox, oy, k, cells, active, color, edges, uid, dim_inactive=False):
-    """Plate, links, glows and cell glyphs. Returns projected cell positions."""
-    plate(s, ox, oy, k)
+def sheet(s, ox, oy, k, cells, active, color, edges, uid, dim_inactive=False, z=1.0):
+    """Plate, links, glows and cell glyphs; z scales glyphs and glows. Returns projected positions."""
+    plate(s, ox, oy, k, thickness=7 * z)
     P = [proj(u, v, ox, oy, k) for u, v in cells]
     for i, j, w in edges:
         s.line(P[i][0], P[i][1], P[j][0], P[j][1], stroke=color, sw=w, opacity=0.85)
     for n in active:
-        glow(s, P[n][0], P[n][1], color, f"{uid}{n}")
+        glow(s, P[n][0], P[n][1], color, f"{uid}{n}", rx=24 * z, ry=18 * z)
     for n, (x, y) in enumerate(P):
         if n in active:
-            cell(s, x, y, fill=color, sw=1.3)
+            cell(s, x, y, fill=color, rx=8.5 * z, ry=6.4 * z, sw=1.3 * z)
         else:
-            cell(s, x, y, fill=CELL if not dim_inactive else "#eceef1", sw=1.0)
+            cell(s, x, y, fill=CELL if not dim_inactive else "#eceef1", rx=8.5 * z, ry=6.4 * z, sw=1.0 * z)
     return P
 
 
-def option1f():
-    rng = np.random.default_rng(12)
-    s = SVG()
-    # ---- the population: a jittered grid of 36 cells on a 380 x 230 sheet -----------------------
+def population(rng):
+    """A jittered grid of 36 cells on the 380 x 230 sheet, and the two overlapping groups."""
     cells, index = [], {}
     for j in range(5):
         for i in range(7):
@@ -143,6 +145,14 @@ def option1f():
     spont = [index[c] for c in ((2, 1), (3, 1), (4, 0), (4, 2), (5, 1), (5, 3), (3, 3), (4, 4), (6, 2))]
     stim = [index[c] for c in ((1, 2), (2, 2), (2, 4), (3, 1), (3, 3))]      # (3,1) and (3,3) are in both
     pref = {0: index[(2, 4)], 45: index[(3, 3)], 90: index[(2, 2)], 135: index[(3, 1)]}   # bottom grating -> lowest cell
+    return cells, spont, stim, pref
+
+
+def option1f():
+    """The wide draft (1460 x 780) shown on the comparison page."""
+    rng = np.random.default_rng(12)
+    s = SVG()
+    cells, spont, stim, pref = population(rng)
     k = 0.92
     sig = smooth_noise(90, rng, cutoff=0.1)
     sig = sig / np.abs(sig).max()
@@ -152,7 +162,6 @@ def option1f():
     ox, oy = 270, 150
     e_a = knn_edges(cells, sorted(set(stim) | set(spont)), 3)        # one co-active network, links crossing the groups
     P = sheet(s, ox, oy, k, cells, set(stim) | set(spont), DARK, e_a, "a")
-    # the line of directions: four patches receding along a slanted line
     line = [(92, 330), (128, 268), (162, 210), (194, 156)]
     sizes = [58, 52, 46, 42]
     s.line(72, 366, 212, 126, stroke=INK, sw=1.4, opacity=0.6)
@@ -162,7 +171,6 @@ def option1f():
         s.text(gx - sz / 2 - 8, gy + 7, f"{d}°", size=19, fill=DIRS[d], weight=600, anchor="end")
         tx, ty = P[pref[d]]
         thin_arrow(s, gx + sz / 2 + 4, gy, tx - 11, ty, DIRS[d], sw=2, head=9, bend=-14, opacity=0.9)
-    # the shared input, still present
     bx, by = 775, 150
     trace_box(s, bx, by, 120, 46, sig, "#8e96a3", "shared input", None, stroke=GREY_LIGHT)
     s.text(bx + 60, by + 66, "still present", size=18, fill=GREY, anchor="middle")
@@ -205,6 +213,75 @@ def option1f():
     s.save(os.path.join(HERE, "option1f-construction.svg"), "Option 1f: the construction, as sheets of neurons")
 
 
+def option1f_vertical(out=POSTER_FIG):
+    """The poster figure: (a) and (b) stacked, the extracted network below. 900 x 1050 poster units,
+    with the poster's own type sizes (panel labels 42 px bold, small labels 26-29 px)."""
+    rng = np.random.default_rng(12)
+    W, H = 900, 1050
+    s = SVG(W, H)
+    cells, spont, stim, pref = population(rng)
+    k, z = 1.0, 1.25                      # sheet scale; glyph and stroke zoom
+    sig = smooth_noise(90, rng, cutoff=0.1)
+    sig = sig / np.abs(sig).max()
+    TITLE, LAB, SMALL = 42, 29, 26
+    e_a = knn_edges(cells, sorted(set(stim) | set(spont)), 3, wmul=1.3)
+    e_b = knn_edges(cells, spont, 3, wmul=1.3)
+    in_b = {(i, j) for i, j, _ in e_b}
+    e_c = [e for e in knn_edges(cells, stim, 2, wmul=1.3) if (e[0], e[1]) not in in_b]
+    OX = 250                               # every sheet shares this left edge
+
+    # ---- (a) drifting gratings ----------------------------------------------------------------
+    s.rich(0, 42, [("(a)", {"weight": 700}), ("  Drifting gratings", {"weight": 700})], size=TITLE)
+    oy = 120
+    P = sheet(s, OX, oy, k, cells, set(stim) | set(spont), DARK, e_a, "a", z=z)
+    line = [(96, 330), (134, 268), (170, 208), (204, 150)]
+    sizes = [66, 60, 54, 48]
+    s.line(74, 368, 224, 118, stroke=INK, sw=1.8, opacity=0.6)
+    s.text(150, 98, "grating direction", size=SMALL, fill=GREY, anchor="middle")
+    for (d, (gx, gy), sz) in zip((0, 45, 90, 135), line, sizes):
+        grating(s, gx, gy, sz, d, f"a{d}", sw=2.0)
+        s.text(gx - sz / 2 - 9, gy + 9, f"{d}°", size=SMALL, fill=DIRS[d], weight=600, anchor="end")
+        tx, ty = P[pref[d]]
+        thin_arrow(s, gx + sz / 2 + 5, gy, tx - 13, ty, DIRS[d], sw=2.5, head=11, bend=-16, opacity=0.9)
+    bx, by, bw, bh = 724, 130, 160, 56
+    trace_box(s, bx, by, bw, bh, sig, "#8e96a3", "shared input", None, stroke=GREY_LIGHT, size=27, sw=2.4)
+    s.text(bx + bw / 2, by + bh + 30, "still present", size=SMALL, fill=GREY, anchor="middle")
+    for n in spont:
+        thin_arrow(s, bx + 10, by + bh - 2, P[n][0] + 10, P[n][1] - 9, "#8e96a3", sw=1.5, head=8, bend=-10, opacity=0.5)
+    s.text(OX + 60, 338, "co-active cells, linked", size=LAB, fill=GREY)
+
+    # ---- (b) gray screen ------------------------------------------------------------------------
+    s.rich(0, 412, [("(b)", {"weight": 700}), ("  Gray screen", {"weight": 700})], size=TITLE)
+    oy2 = 490
+    P2 = sheet(s, OX, oy2, k, cells, set(spont), BLUE, e_b, "b", z=z)
+    gx, gy, sz = 150, 560, 64
+    s.rect(gx - sz / 2, gy - sz / 2, sz, sz, fill="#9d9d9d", stroke=INK, sw=2.0, rx=8)
+    s.text(gx, gy + sz / 2 + 32, "gray screen", size=SMALL, fill=GREY, anchor="middle")
+    bx, by = 712, 500
+    trace_box(s, bx, by, bw, bh, sig, BLUE, "shared input", "arousal, running", size=27, subsize=SMALL, sw=2.4)
+    s.text(bx + bw / 2, by + bh + 64, "one signal,", size=SMALL, fill=BLUE, weight=600, anchor="middle")
+    s.text(bx + bw / 2, by + bh + 92, "many cells", size=SMALL, fill=BLUE, weight=600, anchor="middle")
+    for n in spont:
+        thin_arrow(s, bx + 10, by + bh - 2, P2[n][0] + 10, P2[n][1] - 9, BLUE, sw=1.8, head=9, bend=-10, opacity=0.8)
+    s.rich(OX + 60, 708, [("redundant", {"fill": BLUE, "weight": 700}), (" links: a subset of the cells in (a)", {"fill": GREY})], size=LAB)
+
+    # ---- the question ---------------------------------------------------------------------------
+    thin_arrow(s, 470, 728, 470, 790, INK, sw=2.8, head=15)
+    s.text(432, 778, "?", size=66, weight=700, anchor="end")
+    s.text(492, 758, "which links did", size=SMALL, fill=GREY)
+    s.text(492, 786, "the grating add?", size=SMALL, fill=GREY)
+
+    # ---- (c) stimulus-engaged -----------------------------------------------------------------
+    s.rich(0, 842, [("(c)", {"weight": 700}), ("  Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=TITLE)
+    oy3 = 862
+    sheet(s, OX, oy3, k, cells, set(stim), GREEN, e_c, "c", dim_inactive=True, z=z)
+    s.text(724, 930, "links in (a)", size=SMALL, fill=GREY)
+    s.text(724, 958, "not in (b)", size=SMALL, fill=GREY)
+    s.save(out, "The construction: gratings, gray screen, and what the grating engaged")
+    return out
+
+
 if __name__ == "__main__":
     option1f()
     print("wrote option1f-construction.svg")
+    print("wrote", option1f_vertical())
