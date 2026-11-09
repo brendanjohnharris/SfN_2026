@@ -18,12 +18,16 @@ FILES=(                                    # karl path -> figures/src/<basename>
     "$LAB/plots/trial_stack_covariance.svg"  # s3-cards
     "$LAB/plots/trial_stack_covariance.png"
     "$LAB/_research/neuropixels_nugget/nugget_construction.png"
-    "$LAB/_research/neuropixels_nugget/nugget_poster.svg"   # s3-noise
-    "$LAB/_research/neuropixels_nugget/nugget_poster.png"
+    "$LAB/_research/neuropixels_nugget/noise_poster.svg"    # s3-noise
+    "$LAB/_research/neuropixels_nugget/noise_poster.png"
+    "$LAB/_research/neuropixels_nugget/noise_poster_layout.tsv"
     "$LAB/_research/phantom_correlated/phantom_construction.svg"
     "$LAB/_research/phantom_correlated/phantom_construction.png"
     "$LAB/_research/phantom_correlated/phantom_poster.svg"  # s4-schematic
     "$LAB/_research/phantom_correlated/phantom_poster.png"
+    "$LAB/_research/phantom_correlated/phantom_results_poster.svg"  # s4-results
+    "$LAB/_research/phantom_correlated/phantom_results_poster.png"
+    "$LAB/_research/phantom_correlated/phantom_results_poster_layout.tsv"
 )
 
 if [[ ${1:-} == -n ]]; then

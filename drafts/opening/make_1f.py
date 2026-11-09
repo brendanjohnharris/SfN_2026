@@ -3,8 +3,9 @@ MiB 2026 posters: oblique plates with a visible edge (the MiB "population bath")
 flattened cell glyphs, soft glows for activity, thin semantic-coloured arrows with small heads,
 real-looking stimuli and traces, bold panel letters and almost no prose inside the figure.
 
-(a) A line of grating directions feeds a sheet of neurons; each grating drives a different cell
-    and the shared input keeps driving its own, overlapping group. Co-active cells are linked.
+(a) A line of grating directions feeds a sheet of neurons; each grating drives its own small
+    subnetwork (coloured by direction, blended where a cell answers several) and the shared input
+    keeps driving the background group (gray), which overlaps them. Co-active cells are linked.
 (b) The gray screen: one shared signal fans out to one group of cells (one signal, many copies).
 (?) Which links did the grating add?  (c) The stimulus-engaged set.
 
@@ -24,7 +25,7 @@ from svgkit import SVG, BLACK, BLUE, RED, GREEN, GREY, GREY_LIGHT, DARK, WHITE, 
 HERE = os.path.dirname(os.path.abspath(__file__))
 POSTER_FIG = os.path.normpath(os.path.join(HERE, "..", "..", "figures", "src", "construction_poster.svg"))
 
-INK = "#2b2f36"          # outlines, as in the Makie figures
+INK = "#282c34"          # outlines: Fathom chernoe, as in the Makie figures
 PLATE = "#f3f4f6"        # sheet face
 PLATE_EDGE = "#b9bec5"   # sheet thickness
 CELL = "#e4e7ea"         # resting cell fill
@@ -57,6 +58,12 @@ def glow(s, x, y, color, uid, rx=24, ry=18):
 def cell(s, x, y, fill=CELL, rx=8.5, ry=6.4, sw=1.2):
     """A cell body lying on the sheet: a foreshortened ellipse with an ink outline."""
     s.add(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{rx:.1f}" ry="{ry:.1f}" style="fill:{fill};stroke:{INK};stroke-width:{sw}"/>')
+
+
+def blend(colors):
+    """The mean of some hex colours: a cell in several subnetworks wears all of them."""
+    rgb = [[int(c[i:i + 2], 16) for i in (1, 3, 5)] for c in colors]
+    return "#%02x%02x%02x" % tuple(round(sum(ch) / len(rgb)) for ch in zip(*rgb))
 
 
 def thin_arrow(s, x1, y1, x2, y2, color, sw=1.8, head=9, bend=0.0, opacity=0.9):
@@ -115,23 +122,26 @@ def knn_edges(pts, idx, kn=3, wmul=1.0):
 
 
 def sheet(s, ox, oy, k, cells, active, color, edges, uid, dim_inactive=False, z=1.0):
-    """Plate, links, glows and cell glyphs; z scales glyphs and glows. Returns projected positions."""
+    """Plate, links, glows and cell glyphs; z scales glyphs and glows. `color` is one colour or a dict
+    per active cell (a link takes the blend of its ends). Returns projected positions."""
+    col = color.__getitem__ if isinstance(color, dict) else lambda n: color
     plate(s, ox, oy, k, thickness=7 * z)
     P = [proj(u, v, ox, oy, k) for u, v in cells]
     for i, j, w in edges:
-        s.line(P[i][0], P[i][1], P[j][0], P[j][1], stroke=color, sw=w, opacity=0.85)
+        s.line(P[i][0], P[i][1], P[j][0], P[j][1], stroke=blend([col(i), col(j)]), sw=w, opacity=0.85)
     for n in active:
-        glow(s, P[n][0], P[n][1], color, f"{uid}{n}", rx=24 * z, ry=18 * z)
+        glow(s, P[n][0], P[n][1], col(n), f"{uid}{n}", rx=24 * z, ry=18 * z)
     for n, (x, y) in enumerate(P):
         if n in active:
-            cell(s, x, y, fill=color, rx=8.5 * z, ry=6.4 * z, sw=1.3 * z)
+            cell(s, x, y, fill=col(n), rx=8.5 * z, ry=6.4 * z, sw=1.3 * z)
         else:
             cell(s, x, y, fill=CELL if not dim_inactive else "#eceef1", rx=8.5 * z, ry=6.4 * z, sw=1.0 * z)
     return P
 
 
 def population(rng):
-    """A jittered grid of 36 cells on the 380 x 230 sheet, and the two overlapping groups."""
+    """A jittered grid of 36 cells on the 380 x 230 sheet, the background group, and one small
+    subnetwork per grating direction (overlapping each other and the background group)."""
     cells, index = [], {}
     for j in range(5):
         for i in range(7):
@@ -141,18 +151,23 @@ def population(rng):
             v = 24 + j * 46 + rng.uniform(-8, 8)
             index[(i, j)] = len(cells)
             cells.append((u, v))
-    # The two groups interleave and share two cells, so the lit set in (a) reads as one network.
+    # The groups interleave and share cells, so the lit set in (a) reads as one network.
     spont = [index[c] for c in ((2, 1), (3, 1), (4, 0), (4, 2), (5, 1), (5, 3), (3, 3), (4, 4), (6, 2))]
-    stim = [index[c] for c in ((1, 2), (2, 2), (2, 4), (3, 1), (3, 3))]      # (3,1) and (3,3) are in both
-    pref = {0: index[(2, 4)], 45: index[(3, 3)], 90: index[(2, 2)], 135: index[(3, 1)]}   # bottom grating -> lowest cell
-    return cells, spont, stim, pref
+    subnets = {0: [(2, 4), (3, 3), (2, 2)], 45: [(2, 3), (3, 3), (3, 1)], 90: [(1, 2), (2, 2)], 135: [(1, 1), (3, 1)]}
+    subnets = {d: [index[c] for c in cs] for d, cs in subnets.items()}       # (3,3), (2,2), (3,1) answer two directions
+    stim = sorted(set().union(*subnets.values()))
+    pref = {d: m[0] for d, m in subnets.items()}                             # the arrow's target: bottom grating -> lowest cell
+    colors = {n: GREY for n in spont}                                        # background network
+    for n in stim:
+        colors[n] = blend([DIRS[d] for d, m in subnets.items() if n in m])
+    return cells, spont, stim, pref, colors
 
 
 def option1f():
     """The wide draft (1460 x 780) shown on the comparison page."""
     rng = np.random.default_rng(12)
     s = SVG()
-    cells, spont, stim, pref = population(rng)
+    cells, spont, stim, pref, colors = population(rng)
     k = 0.92
     sig = smooth_noise(90, rng, cutoff=0.1)
     sig = sig / np.abs(sig).max()
@@ -161,7 +176,7 @@ def option1f():
     s.rich(30, 60, [("(a)", {"weight": 700}), ("  Drifting gratings", {"weight": 700})], size=34)
     ox, oy = 270, 150
     e_a = knn_edges(cells, sorted(set(stim) | set(spont)), 3)        # one co-active network, links crossing the groups
-    P = sheet(s, ox, oy, k, cells, set(stim) | set(spont), DARK, e_a, "a")
+    P = sheet(s, ox, oy, k, cells, set(stim) | set(spont), colors, e_a, "a")
     line = [(92, 330), (128, 268), (162, 210), (194, 156)]
     sizes = [58, 52, 46, 42]
     s.line(72, 366, 212, 126, stroke=INK, sw=1.4, opacity=0.6)
@@ -182,7 +197,7 @@ def option1f():
     s.rich(30, 430, [("(b)", {"weight": 700}), ("  Gray screen", {"weight": 700})], size=34)
     ox2, oy2 = 270, 500
     e_b = knn_edges(cells, spont, 3)
-    P2 = sheet(s, ox2, oy2, k, cells, set(spont), BLUE, e_b, "b")
+    P2 = sheet(s, ox2, oy2, k, cells, set(spont), GREY, e_b, "b")
     gx, gy, sz = 140, 560, 56
     s.rect(gx - sz / 2, gy - sz / 2, sz, sz, fill="#9d9d9d", stroke=INK, sw=1.6, rx=7)
     s.text(gx, gy + sz / 2 + 26, "gray screen", size=19, fill=GREY, anchor="middle")
@@ -206,78 +221,77 @@ def option1f():
     s.rich(1080, 292, [("(c)", {"weight": 700}), ("  Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=34)
     in_b = {(i, j) for i, j, _ in knn_edges(cells, spont, 3)}
     e_c = [e for e in knn_edges(cells, stim, 2) if (e[0], e[1]) not in in_b]   # links in (a) that are not in (b)
-    sheet(s, 1080, 330, 0.75, cells, set(stim), GREEN, e_c, "c", dim_inactive=True)
+    sheet(s, 1080, 330, 0.75, cells, set(stim), colors, e_c, "c", dim_inactive=True)
     s.text(1090, 500, "the links in (a) that are not in (b)", size=20, fill=GREY)
     s.rich(1090, 532, [("bPCA: variance in (a) ", {"fill": GREY}), ("relative to (b)", {"fill": BLUE, "weight": 600}), (",", {"fill": GREY})], size=20)
     s.rich(1090, 560, [("above the ", {"fill": GREY}), ("spiking noise", {"fill": RED, "weight": 600}), (", per direction", {"fill": GREY})], size=20)
     s.save(os.path.join(HERE, "option1f-construction.svg"), "Option 1f: the construction, as sheets of neurons")
 
 
+SLOT_W, SLOT_H = 755, 1450                 # the poster slot; link_construction.py sets it from the text column
+
+
 def option1f_vertical(out=POSTER_FIG):
-    """The poster figure: (a) and (b) stacked, the extracted network below. 900 x 1050 poster units,
-    with the poster's own type sizes (panel labels 42 px bold, small labels 26-29 px)."""
+    """The poster figure: (a) and (b) stacked, the extracted network below, with only the essential
+    annotations (the caption carries the rest). 720 figure units wide and as tall as the slot's aspect
+    asks, with the poster's own type sizes (panel labels 42 px bold, small labels 26-29 px). The sheets
+    are drawn less oblique than the wide draft to use the height; the panels are spaced evenly, with
+    the "?" arrow centred in the gap below (b)."""
+    global SQUASH
+    squash0, SQUASH = SQUASH, 0.9
     rng = np.random.default_rng(12)
-    W, H = 900, 1050
+    W = 720
+    H = round(W * SLOT_H / SLOT_W)
     s = SVG(W, H)
-    cells, spont, stim, pref = population(rng)
+    cells, spont, stim, pref, colors = population(rng)
     k, z = 1.0, 1.25                      # sheet scale; glyph and stroke zoom
-    sig = smooth_noise(90, rng, cutoff=0.1)
-    sig = sig / np.abs(sig).max()
     TITLE, LAB, SMALL = 42, 29, 26
     e_a = knn_edges(cells, sorted(set(stim) | set(spont)), 3, wmul=1.3)
     e_b = knn_edges(cells, spont, 3, wmul=1.3)
     in_b = {(i, j) for i, j, _ in e_b}
     e_c = [e for e in knn_edges(cells, stim, 2, wmul=1.3) if (e[0], e[1]) not in in_b]
     OX = 250                               # every sheet shares this left edge
+    CAP, DROP = 30, 40                     # label cap height, label baseline to sheet top
+    SH = SQUASH * SHEET_H + 7 * z          # a sheet's drawn height
+    r = SQUASH / squash0                   # the grating stack stretches with the sheet
+    oy = 120
+    stack_bottom = oy + r * (324 - 120)
+    GAP = (H - stack_bottom - 2 * (CAP + DROP + SH)) / 2     # equal gaps between panels
 
     # ---- (a) drifting gratings ----------------------------------------------------------------
     s.rich(0, 42, [("(a)", {"weight": 700}), ("  Drifting gratings", {"weight": 700})], size=TITLE)
-    oy = 120
-    P = sheet(s, OX, oy, k, cells, set(stim) | set(spont), DARK, e_a, "a", z=z)
-    line = [(96, 330), (134, 268), (170, 208), (204, 150)]
+    P = sheet(s, OX, oy, k, cells, set(stim) | set(spont), colors, e_a, "a", z=z)
+    line = [(96, oy + r * 166), (134, oy + r * 104), (170, oy + r * 44), (204, oy - r * 14)]
     sizes = [66, 60, 54, 48]
-    s.line(74, 368, 224, 118, stroke=INK, sw=1.8, opacity=0.6)
-    s.text(150, 98, "grating direction", size=SMALL, fill=GREY, anchor="middle")
+    s.line(74, stack_bottom, 224, oy - r * 46, stroke=INK, sw=1.8, opacity=0.6)
     for (d, (gx, gy), sz) in zip((0, 45, 90, 135), line, sizes):
         grating(s, gx, gy, sz, d, f"a{d}", sw=2.0)
         s.text(gx - sz / 2 - 9, gy + 9, f"{d}°", size=SMALL, fill=DIRS[d], weight=600, anchor="end")
         tx, ty = P[pref[d]]
         thin_arrow(s, gx + sz / 2 + 5, gy, tx - 13, ty, DIRS[d], sw=2.5, head=11, bend=-16, opacity=0.9)
-    bx, by, bw, bh = 724, 130, 160, 56
-    trace_box(s, bx, by, bw, bh, sig, "#8e96a3", "shared input", None, stroke=GREY_LIGHT, size=27, sw=2.4)
-    s.text(bx + bw / 2, by + bh + 30, "still present", size=SMALL, fill=GREY, anchor="middle")
-    for n in spont:
-        thin_arrow(s, bx + 10, by + bh - 2, P[n][0] + 10, P[n][1] - 9, "#8e96a3", sw=1.5, head=8, bend=-10, opacity=0.5)
-    s.text(OX + 60, 338, "co-active cells, linked", size=LAB, fill=GREY)
 
     # ---- (b) gray screen ------------------------------------------------------------------------
-    s.rich(0, 412, [("(b)", {"weight": 700}), ("  Gray screen", {"weight": 700})], size=TITLE)
-    oy2 = 490
-    P2 = sheet(s, OX, oy2, k, cells, set(spont), BLUE, e_b, "b", z=z)
-    gx, gy, sz = 150, 560, 64
+    lb = stack_bottom + GAP + CAP
+    s.rich(0, lb, [("(b)", {"weight": 700}), ("  Gray screen", {"weight": 700})], size=TITLE)
+    oy2 = lb + DROP
+    sheet(s, OX, oy2, k, cells, set(spont), GREY, e_b, "b", z=z)
+    gx, gy, sz = 150, oy2 + SH / 2 - 20, 64
     s.rect(gx - sz / 2, gy - sz / 2, sz, sz, fill="#9d9d9d", stroke=INK, sw=2.0, rx=8)
-    s.text(gx, gy + sz / 2 + 32, "gray screen", size=SMALL, fill=GREY, anchor="middle")
-    bx, by = 712, 500
-    trace_box(s, bx, by, bw, bh, sig, BLUE, "shared input", "arousal, running", size=27, subsize=SMALL, sw=2.4)
-    s.text(bx + bw / 2, by + bh + 64, "one signal,", size=SMALL, fill=BLUE, weight=600, anchor="middle")
-    s.text(bx + bw / 2, by + bh + 92, "many cells", size=SMALL, fill=BLUE, weight=600, anchor="middle")
-    for n in spont:
-        thin_arrow(s, bx + 10, by + bh - 2, P2[n][0] + 10, P2[n][1] - 9, BLUE, sw=1.8, head=9, bend=-10, opacity=0.8)
-    s.rich(OX + 60, 708, [("redundant", {"fill": BLUE, "weight": 700}), (" links: a subset of the cells in (a)", {"fill": GREY})], size=LAB)
+    s.text(gx, gy + sz / 2 + 38, "Redundant links", size=LAB, fill=BLUE, weight=700, anchor="middle")   # under the screen
 
-    # ---- the question ---------------------------------------------------------------------------
-    thin_arrow(s, 470, 728, 470, 790, INK, sw=2.8, head=15)
-    s.text(432, 778, "?", size=66, weight=700, anchor="end")
-    s.text(492, 758, "which links did", size=SMALL, fill=GREY)
-    s.text(492, 786, "the grating add?", size=SMALL, fill=GREY)
+    # ---- the question, centred in the gap ---------------------------------------------------------
+    sb = oy2 + SH
+    mid = sb + GAP / 2
+    thin_arrow(s, 470, mid - 34, 470, mid + 34, INK, sw=2.8, head=15)
+    s.text(432, mid + 24, "?", size=66, weight=700, anchor="end")
 
     # ---- (c) stimulus-engaged -----------------------------------------------------------------
-    s.rich(0, 842, [("(c)", {"weight": 700}), ("  Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=TITLE)
-    oy3 = 862
-    sheet(s, OX, oy3, k, cells, set(stim), GREEN, e_c, "c", dim_inactive=True, z=z)
-    s.text(724, 930, "links in (a)", size=SMALL, fill=GREY)
-    s.text(724, 958, "not in (b)", size=SMALL, fill=GREY)
+    lc = sb + GAP + CAP
+    s.rich(0, lc, [("(c)", {"weight": 700}), ("  Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=TITLE)
+    sheet(s, OX, lc + DROP, k, cells, set(stim), colors, e_c, "c", dim_inactive=True, z=z)
     s.save(out, "The construction: gratings, gray screen, and what the grating engaged")
+    SQUASH = squash0
+    print(f"vertical figure {W} x {H}, panel gap {GAP:.0f}")
     return out
 
 

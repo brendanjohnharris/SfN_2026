@@ -1,78 +1,44 @@
-"""Link figures/src/construction_poster.svg into SfN_2026.svg as the Section 1 figure.
+"""Link figures/src/construction_poster.svg into SfN_2026.svg and lay out Section 1.
 
-Replaces the cameras figure (`s1-cameras`, a crop of Fig1_schematic.svg) with the construction
-figure, drops the three poster-drawn panel letters (the new figure carries its own), moves the
-Section 1 caption box to the right of the figure and rewrites the caption. Re-running it on a
-converted poster only refreshes the caption box and text, so edit CAPTION here and rerun.
+The figure fills the section's height at the right. At the left, a text column holds the intro as
+free text (the relink's TEXTS, rewrapped here) over the caption box, which runs to the section foot.
+The column takes the narrowest width (a multiple of 10) at which both fit; the figure is redrawn by
+make_1f.py's option1f_vertical whenever the slot this leaves changes shape. Run it after
+figures/relink_case_studies.py, which rewraps the intro texts in place.
 
 Usage, from the repo root:  python3 drafts/opening/link_construction.py
 """
 
-import glob
 import os
 import re
+import sys
 
-ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
+sys.path[:0] = [HERE, os.path.join(ROOT, "figures")]
+import make_1f                                  # noqa: E402
+import relink_case_studies as R                 # noqa: E402
+
 POSTER = os.path.join(ROOT, "SfN_2026.svg")
 FIG = "figures/src/construction_poster.svg"
-FW, FH = 900, 1050            # the figure's size (poster units; it is placed at scale 1)
-FX, FY = 110, 1050            # where it sits in the column
-CAP_X, CAP_Y, CAP_W = 1040, 1050, 638      # the caption box, to the right of the figure
-PAD, SIZE, LH = 26, 36, 36 * 1.133          # box padding, caption font size, line height (poster convention)
+X0, X1, Y0, Y1 = 103, 1678, 631, 2081       # Section 1's content area (51 inside the white panel)
+GUTTER, CAP_GAP = 30, 40                    # column to figure; intro text to caption box
+PAD, SIZE, LH = 26, 36, 36 * 1.133          # caption box padding, font size, line height
+LH40 = 40 * 1.133                           # the intro's line height
 STYLE = f"font-size:{SIZE}px;line-height:1.133;font-family:'Source Sans 3';fill:#100f0d;text-anchor:start"
 
 # Runs of (text, style): "" regular, "b" semibold, "i" italic. Wrapped at run time with the real font.
 CAPTION = [
-    ("Left:", "i"), (" ", ""), ("(a)", "b"),
-    (" A line of grating directions feeds a sheet of cells. Each grating drives one cell most "
-     "(coloured arrows), and a shared input keeps driving its own group (grey), which overlaps the "
-     "driven one. Co-active cells are linked, and the recording does not say which link came from "
-     "where. ", ""),
+    ("Right:", "i"), (" ", ""), ("(a)", "b"),
+    (" Each grating direction activates a subnetwork (coloured by direction), on top of a background network "
+     "(gray) that is active without any stimulus.\n", ""),
     ("(b)", "b"),
-    (" Gray screen: the shared input alone drives one group, one signal fanned to many cells: "
-     "redundant links, and a subset of the cells in (a). ", ""),
+    (" A gray screen drives the background network only, revealing the redundant subspace.\n", ""),
     ("(c)", "b"),
-    (" Which links did the grating add? Subtracting the pictures is the idea. Baseline PCA measures "
-     "the variance in (a) relative to (b), above the spiking noise, one direction at a time, whereas "
-     "PCA on (a) alone returns the largest cluster, the redundant one.", ""),
+    (" Correcting for the redundant activity reveals stimulus-engaged subnetworks. Baseline PCA measures the "
+     "variance in (a) relative to (b), above the spiking noise, whereas PCA on (a) alone returns the largest and "
+     "most active subnetwork dominated by redundancy.", ""),
 ]
-
-
-def measurer():
-    """Text width in px at SIZE, with Source Sans 3 when it is installed (else a 0.5 em estimate)."""
-    try:
-        from PIL import ImageFont
-        fonts = {}
-        for kind, pat in (("", "SourceSans3-Regular"), ("b", "SourceSans3-Semibold"), ("i", "SourceSans3-It")):
-            paths = glob.glob(os.path.expanduser(f"~/.fonts/{pat}.otf")) + glob.glob(f"/usr/share/fonts/**/{pat}.otf", recursive=True)
-            fonts[kind] = ImageFont.truetype(paths[0], SIZE)
-        return lambda txt, kind: fonts[kind].getlength(txt)
-    except Exception:
-        return lambda txt, kind: 0.5 * SIZE * len(txt)
-
-
-def wrap(runs, width):
-    """Greedy word wrap of styled runs into lines of [(word-or-space, kind)], measured per run."""
-    w = measurer()
-    tokens = []
-    for text, kind in runs:
-        for part in re.split(r"(\s+)", text):
-            if part:
-                tokens.append((part, kind))
-    lines, cur, cur_w = [], [], 0.0
-    for tok, kind in tokens:
-        tw = w(tok, kind)
-        if tok.isspace():
-            cur.append((tok, kind)); cur_w += tw
-            continue
-        if cur and cur_w + tw > width:
-            while cur and cur[-1][0].isspace():
-                cur.pop()
-            lines.append(cur); cur, cur_w = [], 0.0
-        cur.append((tok, kind)); cur_w += tw
-    if cur:
-        lines.append(cur)
-    return lines
 
 
 def tspan_line(line, x, y, n):
@@ -87,39 +53,52 @@ def tspan_line(line, x, y, n):
     return f'<tspan x="{x}" y="{y:.4f}" id="s1-cap-{n}">{"".join(out)}</tspan>'
 
 
-def main():
-    s = open(POSTER, encoding="utf-8").read()
-    if "s1-construction" not in s:
-        # 1. the clip rect becomes the new slot
-        s, n = re.subn(r'<clipPath id="clip-s1-cameras" clipPathUnits="userSpaceOnUse"><rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+" id="rect275"/></clipPath>',
-                       f'<clipPath id="clip-s1-construction" clipPathUnits="userSpaceOnUse"><rect x="{FX:.2f}" y="{FY:.2f}" width="{FW:.2f}" height="{FH:.2f}" id="rect275"/></clipPath>', s)
-        assert n == 1, "clip-s1-cameras not found"
-        # 2. the figure group
-        group = (f'<g id="s1-construction" clip-path="url(#clip-s1-construction)" data-src="{FIG}" data-crop="0 0 {FW} {FH}">'
-                 f'<g transform="matrix(1,0,0,1,{FX},{FY})" id="g795">'
-                 f'<image id="s1-construction-src" xlink:href="{FIG}" x="0" y="0" width="{FW}" height="{FH}" preserveAspectRatio="none"/>'
-                 f'</g></g>')
-        s, n = re.subn(r'<g id="s1-cameras" .*?</g></g>', group, s, count=1, flags=re.S)
-        assert n == 1, "s1-cameras group not found"
-        # 3. the poster-drawn panel letters of the old figure
-        s, n = re.subn(r'<text [^>]*id="s1-cameras-label-[abc]"><tspan id="tspan\d+">\([abc]\)</tspan></text>', '', s)
-        assert n == 3, f"expected 3 panel letters, removed {n}"
-        print("replaced the cameras figure with", FIG)
-    # 4. the caption text, wrapped to the box
-    x0, y0 = CAP_X + PAD, CAP_Y + PAD + SIZE * 0.78
-    lines = wrap(CAPTION, CAP_W - 2 * PAD)
+def lay(s, lw):
+    """Intro and caption at column width `lw`; returns the poster and the caption's spare height."""
+    y = Y0 + 40 * 0.78
+    for tid, x, step in (("text1195", X0, 0), ("text1197", X0 + 82, 56.7), ("text1204", X0 + 82, 50.66), ("text1207", X0, 56.66)):
+        y += step
+        s = R.move_text(s, tid, x, y, X0 + lw - x)
+        s = R.retext(s, tid, R.TEXTS[tid])
+        if tid in ("text1197", "text1204"):                               # the bullet's icon
+            icon = "s1-icon-red" if tid == "text1197" else "s1-icon-noise"
+            s, n = re.subn(r'(<g id="%s" transform="translate\()[\d.]+,[\d.]+' % icon, rf"\g<1>{X0 + 18:.2f},{y - 30:.2f}", s); assert n == 1
+        y += (R.retext.lines - 1) * LH40
+    cap_y = y + 40 * 0.3 + CAP_GAP
+    lines = R.wrap(CAPTION, lw - 2 * PAD, SIZE)
+    need = 2 * PAD + SIZE * 0.78 + (len(lines) - 1) * LH + SIZE * 0.3
+    x0, y0 = X0 + PAD, cap_y + PAD + SIZE * 0.78
     body = "".join(tspan_line(line, x0, y0 + i * LH, i) for i, line in enumerate(lines))
-    cap_h = 2 * PAD + SIZE * 0.78 + (len(lines) - 1) * LH + SIZE * 0.3
-    new_text = (f'<text x="{x0:.2f}" y="{y0:.2f}" style="{STYLE};inline-size:{CAP_W - 2 * PAD:.1f}px" xml:space="preserve" id="text1217">'
+    new_text = (f'<text x="{x0:.2f}" y="{y0:.2f}" style="{STYLE};inline-size:{lw - 2 * PAD:.1f}px" xml:space="preserve" id="text1217">'
                 f'{body}</text>')
     s, n = re.subn(r'<text x="[\d.]+" y="[\d.]+" style="[^"]*" xml:space="preserve" id="text1217">.*?</text>', new_text, s, count=1, flags=re.S)
     assert n == 1, "text1217 not found"
-    # 5. the caption box hugs the text, to the right of the figure
-    s, n = re.subn(r'<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+" style="fill:#eef1f2;stroke:none" id="s1-caption-box"/>',
-                   f'<rect x="{CAP_X:.2f}" y="{CAP_Y:.2f}" width="{CAP_W:.2f}" height="{cap_h:.2f}" style="fill:#eef1f2;stroke:none" id="s1-caption-box"/>', s)
-    assert n == 1, "s1-caption-box not found"
+    s = R.set_box(s, "s1-caption-box", X0, cap_y, lw, Y1 - cap_y)
+    lay.lines = len(lines)
+    return s, Y1 - cap_y - need
+
+
+def main():
+    s = open(POSTER, encoding="utf-8").read()
+    assert "s1-construction" in s, "the one-time cameras-to-construction swap is in git history (2f294a6)"
+    s = re.sub(r'<rect [^>]*id="s1-intro-box"/>', "", s)                  # the intro is free text
+    lw = next(w for w in range(500, 1000, 10) if lay(s, w)[1] >= 0)     # narrowest column that holds the text
+    s, spare = lay(s, lw)
+    # the figure fills the rest, redrawn if the slot changed shape
+    fx = X0 + lw + GUTTER
+    slot_w, slot_h = X1 - fx, Y1 - Y0
+    fw, fh = (float(v) for v in re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', open(os.path.join(ROOT, FIG)).read()).groups())
+    if abs(fh * slot_w / fw - slot_h) > 1:
+        make_1f.SLOT_W, make_1f.SLOT_H = slot_w, slot_h
+        make_1f.option1f_vertical()
+        fw, fh = (float(v) for v in re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', open(os.path.join(ROOT, FIG)).read()).groups())
+    k = slot_w / fw
+    s, n = re.subn(r'<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+" id="rect275"/>',
+                   f'<rect x="{fx:.2f}" y="{Y0:.2f}" width="{slot_w:.2f}" height="{slot_h:.2f}" id="rect275"/>', s); assert n == 1
+    s, n = re.subn(r'data-crop="[^"]*">(<g transform=")matrix\([^)]*\)(" id="g795"><image id="s1-construction-src" xlink:href="[^"]*" x="0" y="0" )width="[\d.]+" height="[\d.]+"',
+                   rf'data-crop="0 0 {fw:g} {fh:g}">\g<1>matrix({k:.5f},0,0,{k:.5f},{fx},{Y0})\g<2>width="{fw:g}" height="{fh:g}"', s); assert n == 1
     open(POSTER, "w", encoding="utf-8").write(s)
-    print(f"caption: {len(lines)} lines, box {CAP_W} x {cap_h:.0f} at {CAP_X},{CAP_Y}")
+    print(f"section 1: text column {lw}, caption {lay.lines} lines ({spare:.0f} px spare); figure {slot_w} x {slot_h} at k = {k:.3f}")
 
 
 if __name__ == "__main__":

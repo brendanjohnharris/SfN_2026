@@ -11,20 +11,21 @@ import math
 import numpy as np
 
 # Poster palette ---------------------------------------------------------------
-BLACK = "#100f0d"      # test data / body text
-BLUE = "#3f6fd1"       # redundancy baseline
-RED = "#f93d53"        # noise baseline
-GREEN = "#5e9a3e"      # bPCA
-GREEN_LIGHT = "#88bc69"
-PURPLE = "#b97ad7"
+BLACK = "#100f0d"      # body text
+CHERNOE = "#282c34"    # Fathom chernoe: test data
+BLUE = "#6ea0f9"       # Fathom baikal: redundancy baseline
+RED = "#f93d53"        # Fathom bermejo: noise baseline
+GREEN = "#88bd69"      # Fathom qinghai: bPCA
+GREEN_LIGHT = "#aeda97"  # light(qinghai)
+PURPLE = "#b97ad7"     # Fathom ianthina
 GREY = "#7a7f87"       # secondary text
 GREY_LIGHT = "#c9ccd1"
 PANEL = "#eef1f2"      # grey boxes on the poster
 DARK = "#26282f"       # header bars
-TEAL = "#2a8c85"       # PC1 colour in the cameras figure
-ORANGE = "#f0932b"     # PC2 colour in the cameras figure
+TEAL = "#4d9393"       # Fathom glas
+ORANGE = "#ffa829"     # Fathom seohae
 WHITE = "#ffffff"
-DIRS = {0: BLACK, 45: RED, 90: BLUE, 135: PURPLE}   # grating-direction colours, as in Section 3
+DIRS = {0: CHERNOE, 45: RED, 90: PURPLE, 135: BLUE}   # grating directions, as Fig3 (chernoe, bermejo, ianthina, baikal)
 
 FONT = "font-family:'Source Sans 3',sans-serif"
 
