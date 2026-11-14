@@ -1,15 +1,10 @@
-# Cosyne_2025
-Poster file for "_Tracking the distance to criticality across the mouse visual cortical hierarchy_", presented at Cosyne 2025 in Montreal (Poster [1-117], 27th March)
+Poster file for "_Inferring stimulus-engaged subspaces from noisy and redundant population activity with Baseline PCA_" (Brendan Harris and Ben Fulcher, School of Physics, The University of Sydney), presented at Neuroscience 2026 in Washington, DC (late-breaking poster LBP076.24, board C25; Wednesday 18 November, 8 am to 12 pm, **presenting 11 am to 12 pm**).
 
-## Additional links
-🎓: [_Physical Review X_ journal article](https://doi.org/10.1103/PhysRevX.14.031021)
+## Contact
+✉️: brendan.harris@sydney.edu.au
 
-💻: [Code repository](https://github.com/brendanjohnharris/Criticality)
+💻: [github.com/brendanjohnharris](https://github.com/brendanjohnharris)
 
-🎥: [Youtube summary](https://youtu.be/4_rIMEl-pcU?si=7DGl8hpQ7orZaxCy)
+🦋: [@brendanjohnharris.bsky.social](https://bsky.app/profile/brendanjohnharris.bsky.social)
 
-📰: [_The Conversation_ article](https://theconversation.com/crashes-blackouts-and-climate-tipping-points-how-can-we-tell-when-a-system-is-close-to-the-edge-236683)
-
-😎: [Instructions for using RAD in Julia, Matlab, and Python](https://time-series-features.gitbook.io/time-series-analysis-tools/time-series-features/rad)
-
-![COSYNE2025](COSYNE2025.png)
+![SfN 2026 poster](SfN_2026.png)
