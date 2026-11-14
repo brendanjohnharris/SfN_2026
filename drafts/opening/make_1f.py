@@ -83,11 +83,15 @@ def thin_arrow(s, x1, y1, x2, y2, color, sw=1.8, head=9, bend=0.0, opacity=0.9):
 def grating(s, cx, cy, size, deg, uid, drift=True, sw=1.6):
     """A drifting-grating patch: a rounded square filled with a sinusoid-like stripe gradient."""
     period = size / 3.2
+    # explicit stops at every half period across the card (dark at multiples of the period, as the old
+    # repeating gradient from x = 0): spreadMethod="repeat" exports to PDF as a sawtooth
+    k0, k1 = math.floor((cx - size) / (period / 2)), math.ceil((cx + size) / (period / 2))
+    x1, x2 = k0 * period / 2, k1 * period / 2
+    stops = "".join(f'<stop offset="{(k - k0) / (k1 - k0):.5f}" stop-color="{"#2a2a2a" if k % 2 == 0 else "#e9e9e9"}"/>'
+                    for k in range(k0, k1 + 1))
     s.defs.append(
-        f'<linearGradient id="gr{uid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="{period:.2f}" y2="0" '
-        f'spreadMethod="repeat" gradientTransform="rotate({deg} {cx:.1f} {cy:.1f})">'
-        f'<stop offset="0" stop-color="#2a2a2a"/><stop offset="0.5" stop-color="#e9e9e9"/>'
-        f'<stop offset="1" stop-color="#2a2a2a"/></linearGradient>')
+        f'<linearGradient id="gr{uid}" gradientUnits="userSpaceOnUse" x1="{x1:.3f}" y1="0" x2="{x2:.3f}" y2="0" '
+        f'gradientTransform="rotate({deg} {cx:.1f} {cy:.1f})">{stops}</linearGradient>')
     h = size / 2
     s.add(f'<rect x="{cx - h:.1f}" y="{cy - h:.1f}" width="{size}" height="{size}" rx="{size * 0.12:.1f}" '
           f'style="fill:url(#gr{uid});stroke:{INK};stroke-width:{sw}"/>')
@@ -121,12 +125,15 @@ def knn_edges(pts, idx, kn=3, wmul=1.0):
     return out
 
 
-def sheet(s, ox, oy, k, cells, active, color, edges, uid, dim_inactive=False, z=1.0):
+def sheet(s, ox, oy, k, cells, active, color, edges, uid, dim_inactive=False, z=1.0, flat=((), ())):
     """Plate, links, glows and cell glyphs; z scales glyphs and glows. `color` is one colour or a dict
-    per active cell (a link takes the blend of its ends). Returns projected positions."""
+    per active cell (a link takes the blend of its ends). `flat` = (links, cells) drawn faint: present but
+    only at baseline level. Returns projected positions."""
     col = color.__getitem__ if isinstance(color, dict) else lambda n: color
     plate(s, ox, oy, k, thickness=7 * z)
     P = [proj(u, v, ox, oy, k) for u, v in cells]
+    for i, j, w in flat[0]:
+        s.line(P[i][0], P[i][1], P[j][0], P[j][1], stroke=GREY_LIGHT, sw=0.6 * w, opacity=0.9)
     for i, j, w in edges:
         s.line(P[i][0], P[i][1], P[j][0], P[j][1], stroke=blend([col(i), col(j)]), sw=w, opacity=0.85)
     for n in active:
@@ -135,7 +142,8 @@ def sheet(s, ox, oy, k, cells, active, color, edges, uid, dim_inactive=False, z=
         if n in active:
             cell(s, x, y, fill=col(n), rx=8.5 * z, ry=6.4 * z, sw=1.3 * z)
         else:
-            cell(s, x, y, fill=CELL if not dim_inactive else "#eceef1", rx=8.5 * z, ry=6.4 * z, sw=1.0 * z)
+            fill = GREY_LIGHT if n in flat[1] else CELL if not dim_inactive else "#eceef1"
+            cell(s, x, y, fill=fill, rx=8.5 * z, ry=6.4 * z, sw=1.0 * z)
     return P
 
 
@@ -173,7 +181,7 @@ def option1f():
     sig = sig / np.abs(sig).max()
 
     # ---- (a) drifting gratings ----------------------------------------------------------------
-    s.rich(30, 60, [("(a)", {"weight": 700}), ("  Drifting gratings", {"weight": 700})], size=34)
+    s.rich(30, 60, [("(a)", {"weight": 700}), (" Drifting gratings", {"weight": 700})], size=34)
     ox, oy = 270, 150
     e_a = knn_edges(cells, sorted(set(stim) | set(spont)), 3)        # one co-active network, links crossing the groups
     P = sheet(s, ox, oy, k, cells, set(stim) | set(spont), colors, e_a, "a")
@@ -194,7 +202,7 @@ def option1f():
     s.text(430, 346, "co-active cells, linked", size=20, fill=GREY)
 
     # ---- (b) gray screen ------------------------------------------------------------------------
-    s.rich(30, 430, [("(b)", {"weight": 700}), ("  Gray screen", {"weight": 700})], size=34)
+    s.rich(30, 430, [("(b)", {"weight": 700}), (" Gray screen", {"weight": 700})], size=34)
     ox2, oy2 = 270, 500
     e_b = knn_edges(cells, spont, 3)
     P2 = sheet(s, ox2, oy2, k, cells, set(spont), GREY, e_b, "b")
@@ -218,7 +226,7 @@ def option1f():
     s.text(984, 462, "the grating add?", size=18, fill=GREY)
 
     # ---- (c) stimulus-engaged -----------------------------------------------------------------
-    s.rich(1080, 292, [("(c)", {"weight": 700}), ("  Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=34)
+    s.rich(1080, 292, [("(c)", {"weight": 700}), (" Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=34)
     in_b = {(i, j) for i, j, _ in knn_edges(cells, spont, 3)}
     e_c = [e for e in knn_edges(cells, stim, 2) if (e[0], e[1]) not in in_b]   # links in (a) that are not in (b)
     sheet(s, 1080, 330, 0.75, cells, set(stim), colors, e_c, "c", dim_inactive=True)
@@ -259,11 +267,10 @@ def option1f_vertical(out=POSTER_FIG):
     GAP = (H - stack_bottom - 2 * (CAP + DROP + SH)) / 2     # equal gaps between panels
 
     # ---- (a) drifting gratings ----------------------------------------------------------------
-    s.rich(0, 42, [("(a)", {"weight": 700}), ("  Drifting gratings", {"weight": 700})], size=TITLE)
+    s.rich(0, 42, [("(a)", {"weight": 700}), (" Drifting gratings", {"weight": 700})], size=TITLE)
     P = sheet(s, OX, oy, k, cells, set(stim) | set(spont), colors, e_a, "a", z=z)
     line = [(96, oy + r * 166), (134, oy + r * 104), (170, oy + r * 44), (204, oy - r * 14)]
     sizes = [66, 60, 54, 48]
-    s.line(74, stack_bottom, 224, oy - r * 46, stroke=INK, sw=1.8, opacity=0.6)
     for (d, (gx, gy), sz) in zip((0, 45, 90, 135), line, sizes):
         grating(s, gx, gy, sz, d, f"a{d}", sw=2.0)
         s.text(gx - sz / 2 - 9, gy + 9, f"{d}°", size=SMALL, fill=DIRS[d], weight=600, anchor="end")
@@ -272,23 +279,25 @@ def option1f_vertical(out=POSTER_FIG):
 
     # ---- (b) gray screen ------------------------------------------------------------------------
     lb = stack_bottom + GAP + CAP
-    s.rich(0, lb, [("(b)", {"weight": 700}), ("  Gray screen", {"weight": 700})], size=TITLE)
+    s.text(470, (max(oy + SH, stack_bottom) + lb - CAP) / 2 + 0.3 * 90, "\u00f7", size=90, weight=700, fill=INK, anchor="middle")   # bPCA: (a) relative to (b)
+    s.rich(0, lb, [("(b)", {"weight": 700}), (" Gray screen", {"weight": 700})], size=TITLE)
     oy2 = lb + DROP
     sheet(s, OX, oy2, k, cells, set(spont), GREY, e_b, "b", z=z)
     gx, gy, sz = 150, oy2 + SH / 2 - 20, 64
     s.rect(gx - sz / 2, gy - sz / 2, sz, sz, fill="#9d9d9d", stroke=INK, sw=2.0, rx=8)
-    s.text(gx, gy + sz / 2 + 38, "Redundant links", size=LAB, fill=BLUE, weight=700, anchor="middle")   # under the screen
+    for i, w in enumerate(("Redundant", "covariance")):                  # under the screen; one line would reach the sheet
+        s.text(gx, gy + sz / 2 + 38 + i * 1.133 * LAB, w, size=LAB, fill=BLUE, weight=700, anchor="middle")
 
     # ---- the question, centred in the gap ---------------------------------------------------------
     sb = oy2 + SH
     mid = sb + GAP / 2
     thin_arrow(s, 470, mid - 34, 470, mid + 34, INK, sw=2.8, head=15)
-    s.text(432, mid + 24, "?", size=66, weight=700, anchor="end")
 
     # ---- (c) stimulus-engaged -----------------------------------------------------------------
     lc = sb + GAP + CAP
-    s.rich(0, lc, [("(c)", {"weight": 700}), ("  Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=TITLE)
-    sheet(s, OX, lc + DROP, k, cells, set(stim), colors, e_c, "c", dim_inactive=True, z=z)
+    s.rich(0, lc, [("(c)", {"weight": 700}), (" Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=TITLE)
+    bg = set(spont) - set(stim)
+    sheet(s, OX, lc + DROP, k, cells, set(stim), colors, e_c, "c", dim_inactive=True, z=z, flat=(e_b, bg))   # (b) at baseline, not erased
     s.save(out, "The construction: gratings, gray screen, and what the grating engaged")
     SQUASH = squash0
     print(f"vertical figure {W} x {H}, panel gap {GAP:.0f}")

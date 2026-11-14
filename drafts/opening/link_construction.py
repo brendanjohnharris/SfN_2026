@@ -30,7 +30,7 @@ STYLE = f"font-size:{SIZE}px;line-height:1.133;font-family:'Source Sans 3';fill:
 # Runs of (text, style): "" regular, "b" semibold, "i" italic. Wrapped at run time with the real font.
 CAPTION = [
     ("Right:", "i"), (" ", ""), ("(a)", "b"),
-    (" Each grating direction activates a subnetwork (coloured by direction), on top of a background network "
+    (" Each grating direction activates a subnetwork (colored by direction), on top of a background network "
      "(gray) that is active without any stimulus.\n", ""),
     ("(b)", "b"),
     (" A gray screen drives the background network only, revealing the redundant subspace.\n", ""),
@@ -56,20 +56,21 @@ def tspan_line(line, x, y, n):
 def lay(s, lw):
     """Intro and caption at column width `lw`; returns the poster and the caption's spare height."""
     y = Y0 + 40 * 0.78
-    for tid, x, step in (("text1195", X0, 0), ("text1197", X0 + 82, 56.7), ("text1204", X0 + 82, 50.66), ("text1207", X0, 56.66)):
+    ind = R.measurer(40)("\u2022 ", "")                                 # hanging indent under the bullet
+    for tid, x, step in (("text1195", X0, 0), ("text1197", X0 + ind, 56.7), ("text1204", X0 + ind, 50.66), ("text1207", X0, 56.66)):
         y += step
         s = R.move_text(s, tid, x, y, X0 + lw - x)
         s = R.retext(s, tid, R.TEXTS[tid])
-        if tid in ("text1197", "text1204"):                               # the bullet's icon
-            icon = "s1-icon-red" if tid == "text1197" else "s1-icon-noise"
-            s, n = re.subn(r'(<g id="%s" transform="translate\()[\d.]+,[\d.]+' % icon, rf"\g<1>{X0 + 18:.2f},{y - 30:.2f}", s); assert n == 1
+        if tid in ("text1197", "text1204"):
+            bid = "s1-icon-red" if tid == "text1197" else "s1-icon-noise"
+            s, n = re.subn(r'<text id="%s" x="[\d.]+" y="[\d.]+"' % bid, f'<text id="{bid}" x="{X0}" y="{y:.2f}"', s); assert n == 1
         y += (R.retext.lines - 1) * LH40
     cap_y = y + 40 * 0.3 + CAP_GAP
     lines = R.wrap(CAPTION, lw - 2 * PAD, SIZE)
     need = 2 * PAD + SIZE * 0.78 + (len(lines) - 1) * LH + SIZE * 0.3
     x0, y0 = X0 + PAD, cap_y + PAD + SIZE * 0.78
     body = "".join(tspan_line(line, x0, y0 + i * LH, i) for i, line in enumerate(lines))
-    new_text = (f'<text x="{x0:.2f}" y="{y0:.2f}" style="{STYLE};inline-size:{lw - 2 * PAD:.1f}px" xml:space="preserve" id="text1217">'
+    new_text = (f'<text x="{x0:.2f}" y="{y0:.2f}" style="{STYLE};--wrap:{lw - 2 * PAD:.1f}px" xml:space="preserve" id="text1217">'
                 f'{body}</text>')
     s, n = re.subn(r'<text x="[\d.]+" y="[\d.]+" style="[^"]*" xml:space="preserve" id="text1217">.*?</text>', new_text, s, count=1, flags=re.S)
     assert n == 1, "text1217 not found"
@@ -82,6 +83,8 @@ def main():
     s = open(POSTER, encoding="utf-8").read()
     assert "s1-construction" in s, "the one-time cameras-to-construction swap is in git history (2f294a6)"
     s = re.sub(r'<rect [^>]*id="s1-intro-box"/>', "", s)                  # the intro is free text
+    s = re.sub(r'<g id="(s1-icon-(?:red|noise))" transform=.*?</g>',     # icons became plain bullets
+               lambda m: f'<text id="{m.group(1)}" x="0" y="0" style="font-size:40px;font-family:\'Source Sans 3\';fill:#100f0d">\u2022</text>', s, flags=re.S)
     lw = next(w for w in range(500, 1000, 10) if lay(s, w)[1] >= 0)     # narrowest column that holds the text
     s, spare = lay(s, lw)
     # the figure fills the rest, redrawn if the slot changed shape

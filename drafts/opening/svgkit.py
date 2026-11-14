@@ -86,7 +86,7 @@ class SVG:
                 }.items())
             bs = f' baseline-shift="{st["shift"]}"' if "shift" in st else ""
             spans.append(f'<tspan style="{style}"{bs}>{s}</tspan>')
-        self.add(f'<text x="{x:.1f}" y="{y:.1f}" style="{FONT};font-size:{size}px;text-anchor:{anchor}">'
+        self.add(f'<text x="{x:.1f}" y="{y:.1f}" style="{FONT};font-size:{size}px;text-anchor:{anchor}" xml:space="preserve">'   # preserve: Inkscape drops inter-tspan spaces otherwise
                  + "".join(spans) + "</text>")
 
     def arrow(self, x1, y1, x2, y2, stroke=BLACK, sw=5, head=18, opacity=1.0):

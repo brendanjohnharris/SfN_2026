@@ -27,7 +27,7 @@ FIG3_W, FIG3_H = 720, 730
 NOISE_FIG, NOISE_W, NOISE_H = "figures/src/noise_poster.svg", 535, 189
 NOISE_LAYOUT = "figures/src/noise_poster_layout.tsv"               # axis boxes, figure units (y down)
 PHANTOM_FIG, PHANTOM_W, PHANTOM_H = "figures/src/phantom_poster.svg", 660, 239
-RESULTS_FIG, RESULTS_W, RESULTS_H = "figures/src/phantom_results_poster.svg", 667, 407
+RESULTS_FIG = "figures/src/phantom_results_poster.svg"
 RESULTS_LAYOUT = "figures/src/phantom_results_poster_layout.tsv"
 S2_CROP = (50.75, 315.0, 439.5, 321.0)    # Fig1's (f)-(h) panel boxes, tight (the 720 x 665 Fig1 of 2026-10-31); its (i)-(j) eigenspectra are dropped
 # Relative to the crop's top-left, in Fig1 units: the poster's (a)-(c) letters (x, baseline) and the covers over
@@ -52,8 +52,7 @@ S2_CONDS = [("r", [("(a) ", "b"), ("Redundancy baseline", "rb"), (" becomes whit
             ("t", [("(c) ", "b"), ("Test data", "b"), (" become diagonal", "")])]
 # The box below: the contrastive methods, then bPCA's solution (assets/symbol-s2-eq.svg, from make_s2_equations.py).
 S2_WHY = [("Earlier contrastive methods can be thought of as comparing the test data with a single baseline [3, 4]:", "")]
-S2_BULLETS = [("sub", "\u2212", [("Subtractive methods", "b"), (" such as cPCA subtract two covariances, but require hyperparameters "
-                                  "to find positive semidefinite solutions", "")]),
+S2_BULLETS = [("sub", "\u2212", [("Subtractive methods", "b"), (" such as cPCA subtract two covariances, but require hyperparameter tuning", "")]),
               ("div", "\u00f7", [("Ratio methods", "b"), (" such as ρPCA divide two covariances, amplifying directions dominated "
                                   "by noise", "")])]
 S2_BPCA = [("bPCA subtracts a noise baseline, then orthogonalizes the eigenvectors ", ""), ("V", "i"),
@@ -79,7 +78,7 @@ TEXTS = {
                   "but scramble the shared latent", "")],
     "text1312": [("Baseline PCA", "b"), (" separates the structure imposed by a constraint of interest from ", ""),
                  ("redundancy", "b"), (" and ", ""), ("noise", "b"),
-                 (", using empirical baselines that characterise the measurement process.", "")],
+                 (", using empirical baselines that characterize the measurement process.", "")],
 }
 REFS = [
     [("Cunningham & Yu, ", ""), ("Dimensionality reduction for large-scale neural recordings", "i"), (", Nature Neuroscience (2014).", "")],
@@ -94,12 +93,8 @@ REFS = [
 REF_IDS = ["text1339", "text1342", "text1345", "text1348", "text1351", "text1354", "text-ref7"]
 REF_COLS = ((3666.0, 3), (4473.5, 4))     # column x and how many refs it holds
 REF_Y0, REF_LH, REF_GAP = 3415.44, 29.3 * 1.27, 6.05
-TAKEHOME = [[("Constraint of interest", "b"), (": a factor that shapes activity, e.g. a stimulus", "")],
-            [("Test data", "b"), (": activity under the constraint of interest", "")],
-            [("Redundancy baseline", "rb"), (": the same system without the constraint", "")],
-            [("Noise baseline", "nb"), (": variance from the measurement process only", "")]]   # header glossary
-TH_X, TH_W, TH_SIZE = 4070, 766, 26                # header box: text left, wrap width, font size
-TITLES = {"tspan1220": "bPCA corrects for redundancy and noise", "tspan1251": "Other contrastive methods"}   # s2-subtitle, s2-whynot-title
+TITLES = {"tspan1220": "bPCA corrects for redundancy and noise", "tspan1251": "Other contrastive methods",
+          "tspan1316": "Other applications"}   # s2-subtitle, s2-whynot-title, s5-beyond-title
 PAD, CAP_SIZE = 26, 36                    # caption box padding and font size (poster convention)
 K3 = 2.853261                 # Section 3's scale (poster units per Fig3 unit), unchanged
 K4 = 2.36                     # Section 4's scale (the schematic and the redrawn results)
@@ -110,6 +105,8 @@ LABEL = "font-size:42px;line-height:1.133;font-family:'Source Sans 3';fill:#100f
 # Fig3 crops (x y w h, figure units), measured from a 2.5 px/unit render: inside each row's bubble border.
 CROP_S3 = (172, 14, 541, 215)             # row 1, (b) PCA, (c) bPCA, (d) decoding
 COVER_S3 = (172, 14, 541, 29.3)           # the row's panel titles (axes start at y = 44)
+EDGE_S3 = (709, 14, 4, 215)               # the panel's rounded right edge
+TINT_S3 = "#f6f9f9"                       # Fig3's panel tint: covers in it make the crop one even panel
 TITLE_BASE_S3 = 37.5                      # source title baseline (figure units) for the poster's own labels
 
 # Numbers from the refreshed outputs (LAB/plots/Fig3_case_studies/*.tsv, data/*.jld2, noisefig_poster.jl's log).
@@ -117,7 +114,7 @@ PCA_K2, BPCA_K2, CHANCE = 31.5, 8.9, 56.25      # decoding error at k = 2 (mean 
 CALLOUT = [[("PCA", "#f93d53", 31.5, 15.86), ("cPCA", "#ffa829", 24.53, 14.57)],   # k = 2 error, mean ± SD over
            [("ρPCA", "#6ea0f9", 12.82, 9.92), ("bPCA", "#88bd69", 8.9, 7.65)]]      # sessions (curves_allvis); PCA_COLORS
 R_TRACE_PCA, R_TRACE_BPCA = 0.06, 0.88          # PC1 against the latent, the representative draw
-R_LOAD_PCA, R_LOAD_BPCA = 0.04, 0.94            # PC1 weights against the true loadings
+MC_CPCA, MC_RHOPCA = 0.067, 0.053               # median PC1 |cor| over 100 draws, given Sr (data/phantom_oscillations.jld2 mc_pc1_*)
 NSIM = 100
 NOISE_FRAC = 23                                  # median noise floor / trial-mean variance, %, example session
 
@@ -168,12 +165,12 @@ def wrap(runs, width, size):
 
 
 def retext(s, tid, runs, max_lines=None):
-    """Rewrite text element `tid` with `runs`, rewrapped to its own inline-size, font size and position."""
+    """Rewrite text element `tid` with `runs`, rewrapped to its own wrap width (--wrap), font size and position."""
     m = re.search(r'<text x="([\d.]+)" y="([\d.]+)" style="([^"]*)" xml:space="preserve" id="%s">.*?</text>' % tid, s, re.S)
     assert m, f"{tid} not found"
     x, y, style = float(m.group(1)), float(m.group(2)), m.group(3)
     size = float(re.search(r"font-size:([\d.]+)px", style).group(1))
-    inl = re.search(r"inline-size:([\d.]+)px", style)
+    inl = re.search(r"--wrap:([\d.]+)px", style)
     width = float(inl.group(1)) if inl else 1e9
     lh = float(re.search(r"line-height:([\d.]+)", style).group(1))
     lines = wrap(runs, width, size)
@@ -199,10 +196,10 @@ def layout(path):
 
 
 def move_text(s, tid, x, y, width):
-    """Reposition text element `tid` and set its wrap width (inline-size) before `retext` rewraps it."""
+    """Reposition text element `tid` and set its wrap width (--wrap; not inline-size, which Inkscape reflows) before `retext` rewraps it."""
     m = re.search(r'<text x="[\d.]+" y="[\d.]+" style="([^"]*)" xml:space="preserve" id="%s">' % tid, s)
     assert m, f"{tid} not found"
-    style = re.sub(r"inline-size:[\d.]+px", f"inline-size:{width:.1f}px", m.group(1))
+    style = re.sub(r"--wrap:[\d.]+px", f"--wrap:{width:.1f}px", m.group(1))
     return s[: m.start()] + f'<text x="{x:.2f}" y="{y:.2f}" style="{style}" xml:space="preserve" id="{tid}">' + s[m.end():]
 
 
@@ -216,9 +213,9 @@ def place(crop, slot, k, halign="center", valign="center"):
     return x0 - cx * k, y0 - cy * k, (x0, y0, W, H)
 
 
-def cover(gid, n, rect):
+def cover(gid, n, rect, fill="#ffffff"):
     x, y, w, h = rect
-    return f'<rect id="{gid}-cover-{n}" x="{x:g}" y="{y:g}" width="{w:g}" height="{h:g}" style="fill:#ffffff;stroke:none"/>'
+    return f'<rect id="{gid}-cover-{n}" x="{x:g}" y="{y:g}" width="{w:g}" height="{h:g}" style="fill:{fill};stroke:none"/>'
 
 
 def group(gid, inner_id, src, crop, k, tx, ty, covers, clip=True):
@@ -430,19 +427,20 @@ def main():
     s, n = re.subn(r'<clipPath id="clip-s3-results" clipPathUnits="userSpaceOnUse"><rect [^>]*id="([^"]+)"/></clipPath>',
                    lambda m: clip_def("clip-s3-results", placed, m.group(1)), s)
     assert n == 1, "clip-s3-results not found"
-    g = group("s3-results", "g1031", FIG3, CROP_S3, K3, tx, ty, [cover("s3-results", 0, COVER_S3)])
+    g = group("s3-results", "g1031", FIG3, CROP_S3, K3, tx, ty, [cover("s3-results", 0, COVER_S3, TINT_S3), cover("s3-results", 1, EDGE_S3, TINT_S3)])
     s, n = re.subn(r'<g id="s3-results" .*?</g></g>', g, s, count=1, flags=re.S)
     assert n == 1
     for lid in ("s3-results-label-a", "s3-results-label-b", "s3-results-label-c"):
         x = float(re.search(r'<text x="([\d.]+)" y="[\d.]+" style="[^"]*" xml:space="preserve" id="%s">' % lid, s).group(1))
         s = set_label(s, lid, x, ty + TITLE_BASE_S3 * K3)
 
-    # ── Section 4 results: the redrawn figure (traces across the top, (b) over (c) at the right), the
-    # caption in its empty bottom-left cell ──
+    # ── Section 4 results: the redrawn figure ((a) traces, (b) spectrum, side by side), the caption in a
+    # full-width box below ──
+    RESULTS_W, RESULTS_H = svg_box(RESULTS_FIG)[2:]
     s = re.sub(r'<clipPath id="clip-s4-(results|traces)" .*?</clipPath>', "", s, flags=re.S)   # no poster-side clips here
     x4, y4 = SLOT_S4[0], SLOT_S4[1]
     g = (f'<g id="s4-results" data-src="{RESULTS_FIG}"><g transform="matrix({K4:g},0,0,{K4:g},{x4:.2f},{y4:.2f})" id="g1178">'
-         f'<image id="s4-results-src" xlink:href="{RESULTS_FIG}" x="0" y="0" width="{RESULTS_W}" height="{RESULTS_H}" preserveAspectRatio="none"/></g></g>')
+         f'<image id="s4-results-src" xlink:href="{RESULTS_FIG}" x="0" y="0" width="{RESULTS_W:g}" height="{RESULTS_H:g}" preserveAspectRatio="none"/></g></g>')
     s, n = re.subn(r'(<g id="s4-traces" .*?</g></g>)?<g id="s4-results" .*?</g></g>(<rect id="s4-results-cover-[1-4]"[^>]*/>)*(<g id="s4-traces" .*?</g></g>)?',
                    g, s, count=1, flags=re.S)
     assert n == 1
@@ -450,11 +448,11 @@ def main():
     def at(panel, dx=0, dy=-8):   # a label's left and baseline: above the axis, past its y label by dx (figure units)
         bx, by, bw, bh = L4[panel]
         return x4 + (bx + dx) * K4, y4 + by * K4 + dy
-    s = set_label(s, "s4-results-label-a", *at("traces", 0, -10))
-    s = set_label(s, "s4-results-label-b", *at("eigenspectra", -28))
-    s = set_label(s, "s4-results-label-c", *at("loadings", -28))
-    cx, cy, cw, ch = L4["caption"]
-    bx, by, bw = x4 + cx * K4, y4 + cy * K4 + 8, cw * K4 - 8
+    s = set_label(s, "s4-results-label-a", *at("traces", 0, -30))
+    s = set_label(s, "s4-results-label-b", *at("eigenspectra", -28, -30))
+    s = re.sub(r'<text [^>]*id="s4-results-label-c">.*?</text>', "", s, flags=re.S)     # (c) loadings: dropped
+    s, n = re.subn(r'(<tspan id="tspan1181">)[^<]*', r"\g<1> Principal value spectrum", s); assert n == 1
+    bx, by, bw = x4, y4 + RESULTS_H * K4 + 25, SLOT_S4[2]
     s = move_text(s, "text1305", bx + PAD, by + PAD + CAP_SIZE * 0.78, bw - 2 * PAD)
 
     # ── Section 4 schematic: regenerated at K4 (660 x 239), same slot ──
@@ -492,8 +490,7 @@ def main():
     s = retext(s, "text1262", [("Noise baseline", "b"),
         (": counting noise of firing rates, from spontaneous spikes (below)", "")], max_lines=1)
     s = retext(s, "text1267", [("(d)", "b"),
-        (" Noise dominates fast fluctuations, so the covariance in short windows can be used as an estimate for "
-         "noise.\n", ""),
+        (" Noise dominates fast fluctuations, so short windows can be used to estimate the noise covariance.\n", ""),
         ("(e)", "b"),
         (" We measure noise covariance from spontaneous spikes in 10 ms bins, scaled up to a trial-mean rate, which "
          f"has a median of {NOISE_FRAC}% of units' trial-mean variance.", "")], max_lines=4)
@@ -527,36 +524,43 @@ def main():
         (f", cutting the mean two-component error by {round(PCA_K2 - BPCA_K2)}°.", "")], max_lines=2)
     for tid, runs in TEXTS.items():
         s = retext(s, tid, runs)
+    # authors on two lines, the block (with the affiliation) centred on the crest as before
+    s, n = re.subn(r'(<text x="408.00" y=")[\d.]+(" [^>]*id="authors">).*?</text>',
+                   r'\g<1>163.50\g<2><tspan x="408" y="163.50" id="tspan1184">Brendan Harris</tspan>'
+                   r'<tspan x="408" y="235.50" id="tspan1184b">Ben Fulcher</tspan></text>', s, flags=re.S); assert n == 1
+    s, n = re.subn(r'(<text x="408.00" y=")[\d.]+(" [^>]*id="affiliation">)', r"\g<1>315.50\g<2>", s); assert n == 1
+    s = re.sub(r'<text [^>]*id="s5-code">.*?</text>', "", s, flags=re.S)             # the code line and Julia logo: cut
+    s = re.sub(r'<g [^>]*id="s5-julia">.*?</g>', "", s, flags=re.S)
+    s = add_text(s, "s5-closing", "text1317")                       # closing line, under the last bullet's 2 lines
+    s = move_text(s, "s5-closing", 4418, 2968.67 + 45.32 + 47, 801)
+    s = retext(s, "s5-closing", [("bPCA is a practical algorithm to correct for redundancy and noise across multiple fields.", "")], max_lines=2)
     for tid, txt in TITLES.items():
         s, n = re.subn(r'(<tspan id="%s">)[^<]*(</tspan>)' % tid, rf"\g<1>{txt}\g<2>", s); assert n == 1
-    # glossary: one entry per row, wrapped lines indented
-    lh, ind, EGAP = TH_SIZE * 1.15, 20, 12
+    # header: contact details, one per line under the title bar, filling the white panel (to y = 397)
+    CT, CS, CP = 46, 38, 64                              # title size, contact size, line pitch
+    BAR, f = round(CT * 1.35), CS / 27                   # f: icon scale relative to the original 27 px rows
+    s = re.sub(r'<text id="takehome-[1-4]"[^>]*>.*?</text>', "", s, flags=re.S)
     s = re.sub(r'<rect id="takehome-card-\d"[^>]*/>', "", s)
-    y = 102 + 16 + TH_SIZE * 0.78
-    for i, runs in enumerate(TAKEHOME, 1):
-        lines = wrap(runs, TH_W - ind, TH_SIZE)
-        body = "".join(f'<tspan x="{TH_X + (ind if j else 0):g}" y="{y + j * lh:.2f}">'
-                       + "".join(f'<tspan style="{RUN_STYLE[k]}">{t}</tspan>' if k in RUN_STYLE else t for t, k in line) + "</tspan>"
-                       for j, line in enumerate(lines))
-        s, n = re.subn(r'<text id="takehome-%d"[^>]*>.*?</text>' % i,
-                       f'<text id="takehome-{i}" x="{TH_X:g}" y="{y:.2f}" style="font-size:{TH_SIZE}px;font-family:' + "'Source Sans 3';"
-                       f'font-weight:normal;fill:#100f0d" xml:space="preserve">{body}</text>', s, flags=re.S); assert n == 1
-        y += len(lines) * lh + EGAP
-    y -= EGAP
-    foot = y - lh + 10 + 10                             # last baseline plus descent, plus bottom padding
-    s, n = re.subn(r'(<rect id="takehome-box" x="[\d.]+" y="[\d.]+" width="[\d.]+" height=")[\d.]+"',
-                   rf'\g<1>{foot - 52:.2f}"', s); assert n == 1        # last baseline plus descent, from the box top (52)
-    CDY = 10                                            # contact rows moved down this much from their original place
-    assert foot < 305 + CDY, f"take-home text runs into the contact rows ({foot:.0f})"
-    for tid, y0 in (("contact-email", 331), ("contact-x", 332), ("contact-github", 379), ("contact-bluesky", 377)):
-        s, n = re.subn(r'(<text id="%s" x="[\d.]+" y=")[\d.]+"' % tid, rf'\g<1>{y0 + CDY:g}"', s); assert n == 1
-    for gid, x0, y0 in (("icon-email", 4077, 304), ("icon-github", 4078, 350)):
-        s, n = re.subn(r'<g id="%s" transform="matrix\(1.5,0,0,1.5,[\d.]+,[\d.]+\)">' % gid,
-                       f'<g id="{gid}" transform="matrix(1.5,0,0,1.5,{x0},{y0 + CDY})">', s); assert n == 1
-    for iid, x0, y0 in (("path3133", 4545.7927, 310.0408), ("path3137", 4409.0781, 352.63133)):
-        s, n = re.subn(r'(<image id="%s" [^>]*transform="matrix\(1.3333333,0,0,-1.3333333,)[\d.]+,[\d.]+\)"' % iid,
-                       rf'\g<1>{x0},{y0 + CDY:.5f})"', s); assert n == 1
-    s, n = re.subn(r'(<text id="takehome-title"[^>]*><tspan>)[^<]*(</tspan>)', r"\g<1>Glossary\g<2>", s); assert n == 1
+    s, n = re.subn(r'(<rect id="takehome-bar" x="4052" y="52" width="802" height=")[\d.]+"', rf'\g<1>{BAR}"', s); assert n == 1
+    s, n = re.subn(r'(<rect id="takehome-box" x="4052" y="52" width="802" height=")[\d.]+"', r'\g<1>345"', s); assert n == 1
+    s, n = re.subn(r'<text id="takehome-title" x="[\d.]+" y="[\d.]+" style="font-size:[\d.]+px',
+                   f'<text id="takehome-title" x="4070" y="{52 + BAR / 2 + 0.33 * CT:.1f}" style="font-size:{CT}px', s); assert n == 1
+    s, n = re.subn(r'(<text id="takehome-title"[^>]*><tspan>)[^<]*(</tspan>)', r"\g<1>Contact details\g<2>", s); assert n == 1
+    mid = (52 + BAR + 397) / 2
+    for i, (tid, icon) in enumerate((("contact-email", "icon-email"), ("contact-x", "path3133"),
+                                     ("contact-github", "icon-github"), ("contact-bluesky", "path3137"))):
+        cy, cx = mid + (i - 1.5) * CP, 4095                # icon centre; text x-height centred on it
+        s, n = re.subn(r'(<text id="%s" x=")[\d.]+(" y=")[\d.]+(" style="font-size:)[\d.]+px' % tid,
+                       rf'\g<1>4138\g<2>{cy + 0.33 * CS:.1f}\g<3>{CS}px', s); assert n == 1
+        if icon.startswith("icon-"):                     # 24-unit symbols at scale 1.5
+            a = 1.5 * f
+            s, n = re.subn(r'<g id="%s" transform="matrix\([^)]*\)">' % icon,
+                           f'<g id="{icon}" transform="matrix({a:.4f},0,0,{a:.4f},{cx - 12 * a:.2f},{cy - 12 * a:.2f})">', s); assert n == 1
+        else:                                            # y-flipped images: local centre (u, v)
+            u, v = {"path3133": (8.76, -9.62), "path3137": (8.795, -11.83)}[icon]
+            b_ = 1.3333333 * f
+            s, n = re.subn(r'(<image id="%s" [^>]*transform=")matrix\([^)]*\)"' % icon,
+                           rf'\g<1>matrix({b_:.5f},0,0,{-b_:.5f},{cx - b_ * u:.3f},{cy + b_ * v:.3f})"', s); assert n == 1
     s = retext(s, "text1315", [("In mouse visual cortex, ", ""), ("two bPCA components", "b"),
         (f" decoded grating direction with {bpca}° error, against {pca}° for PCA.", "")], max_lines=3)
     s = retext(s, "text1293", [
@@ -567,16 +571,15 @@ def main():
     s = retext(s, "text1297", [("Noise baseline", "b"),
         (": a calibration recording of the instrument only", "")], max_lines=1)
     s = retext(s, "text1305", [("(a)", "b"),
-        (f" The leading PCA component is a slow phantom oscillation (ρ = {R_TRACE_PCA:.2f} with the latent), "
-         f"whereas the leading bPCA component recovers the latent (ρ = {R_TRACE_BPCA:.2f}).\n", ""),
+        (f" The leading PCA component is a slow phantom oscillation (ρ\u00a0=\u00a0{R_TRACE_PCA:.2f} with the latent), "
+         f"whereas the leading bPCA component recovers the latent (ρ\u00a0=\u00a0{R_TRACE_BPCA:.2f}). Given the same redundancy "
+         f"baseline, cPCA (ρ\u00a0=\u00a0{MC_CPCA:.2f}) and ρPCA (ρ\u00a0=\u00a0{MC_RHOPCA:.2f}) also fail (medians over {NSIM} simulations).\n", ""),
         ("(b)", "b"),
         (f" Held-out eigenvalues (medians across {NSIM} simulations): the two leading PCA eigenvalues are nearly "
          "equal, as for phantom oscillations, whereas the bPCA eigenvalues fall to the baseline level of one "
-         "(dashed) by the third component.\n", ""),
-        ("(c)", "b"),
-        (f" Weights of the leading component against the true loadings of the latent (bPCA ρ = {R_LOAD_BPCA:.2f}; "
-         f"PCA ρ = {R_LOAD_PCA:.2f}).", "")], max_lines=int((ch * K4 - 2 * PAD) / (CAP_SIZE * 1.133)))
+         "(dashed) by the third component.", "")])
     bh = 2 * PAD + CAP_SIZE * 0.78 + (retext.lines - 1) * CAP_SIZE * 1.133 + CAP_SIZE * 0.3
+    assert by + bh < 2649.37 - 25, f"Section 4 caption runs into the Summary bar ({by + bh:.0f})"
     s, n = re.subn(r'<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+" style="fill:#eef1f2;stroke:none" id="s4-caption-box"/>',
                    f'<rect x="{bx:.2f}" y="{by:.2f}" width="{bw:.2f}" height="{bh:.2f}" style="fill:#eef1f2;stroke:none" id="s4-caption-box"/>', s)
     assert n == 1, "s4-caption-box not found"
