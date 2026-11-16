@@ -169,3 +169,5 @@ Validation: full-poster render vs the all-inline git HEAD differs in 0.007% of p
 - Later (2026-11-16): callout heading semibold, not italic, and its last line "Chance level 56°" (relink); Fig3 (h) legend "Chance level".
 - Later (2026-11-16): Fig3 re-rendered (legend "Chance level") and recopied; `FIG3_S3` also drops row 1's outline, and `EDGE_S3` is 8 wide, so no grey marks remain at the crop's right edge.
 - Later (2026-11-16): the Section 3 noise figure is centred horizontally in its grey box (`INK_L`, `INK_R` in the relink; 98 px either side).
+- Branches (2026-11-16): `main` is now hand-edited by Brendan (his Inkscape edits of the poster SVG) and no longer mirrors `dev`; the pre-push hook is disabled (`.git/hooks/pre-push.disabled`). Update `main` only when asked: render his SVG to PDF and PNG with Inkscape (`--export-type=pdf`; `--export-type=png --export-width=5344` on white) and commit the three files there. `dev` keeps the scripted poster, which now differs from `main`.
+- Later (2026-11-17): author "Ben D. Fulcher" (relink, README; `main` edited the same way).

@@ -558,7 +558,7 @@ def main():
     # authors on two lines, the block (with the affiliation) centred on the crest as before
     s, n = re.subn(r'(<text x="408.00" y=")[\d.]+(" [^>]*id="authors">).*?</text>',
                    r'\g<1>163.50\g<2><tspan x="408" y="163.50" id="tspan1184">Brendan Harris</tspan>'
-                   r'<tspan x="408" y="235.50" id="tspan1184b">Ben Fulcher</tspan></text>', s, flags=re.S); assert n == 1
+                   r'<tspan x="408" y="235.50" id="tspan1184b">Ben D. Fulcher</tspan></text>', s, flags=re.S); assert n == 1
     s, n = re.subn(r'(<text x="408.00" y=")[\d.]+(" [^>]*id="affiliation">)', r"\g<1>315.50\g<2>", s); assert n == 1
     s = re.sub(r'<text [^>]*id="s5-code">.*?</text>', "", s, flags=re.S)             # the code line and Julia logo: cut
     s = re.sub(r'<g [^>]*id="s5-julia">.*?</g>', "", s, flags=re.S)
