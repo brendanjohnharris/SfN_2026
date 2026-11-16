@@ -198,8 +198,6 @@
 <ellipse cx="563.6" cy="755.5" rx="10.6" ry="8.0" style="fill:#7a7f87;stroke:#282c34;stroke-width:1.625"/>
 <ellipse cx="610.4" cy="758.1" rx="10.6" ry="8.0" style="fill:#e4e7ea;stroke:#282c34;stroke-width:1.25"/>
 <rect x="118.0" y="624.1" width="64.0" height="64.0" rx="8" style="fill:#9d9d9d;stroke:#282c34;stroke-width:2.0" />
-<text x="150.0" y="726.1" style="font-family:'Source Sans 3',sans-serif;font-size:29px;font-weight:700;fill:#6ea0f9;text-anchor:middle;opacity:1.0" >Redundant</text>
-<text x="150.0" y="759.0" style="font-family:'Source Sans 3',sans-serif;font-size:29px;font-weight:700;fill:#6ea0f9;text-anchor:middle;opacity:1.0" >covariance</text>
 <path d="M470.0,811.6 Q470.0,845.6 470.0,879.6" style="fill:none;stroke:#282c34;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;opacity:0.9"/>
 <path d="M470.0,879.6 L464.2,865.8 L475.8,865.8 Z" style="fill:#282c34;stroke:none;opacity:0.9"/>
 <text x="0.0" y="937.2" style="font-family:'Source Sans 3',sans-serif;font-size:42px;text-anchor:start" xml:space="preserve"><tspan style="fill:#100f0d;font-weight:700;font-style:normal;font-size:42px">(c)</tspan><tspan style="fill:#88bd69;font-weight:700;font-style:normal;font-size:42px"> Stimulus-engaged</tspan></text>

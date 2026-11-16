@@ -68,7 +68,7 @@ def lay(s, lw):
     cap_y = y + 40 * 0.3 + CAP_GAP
     lines = R.wrap(CAPTION, lw - 2 * PAD, SIZE)
     need = 2 * PAD + SIZE * 0.78 + (len(lines) - 1) * LH + SIZE * 0.3
-    x0, y0 = X0 + PAD, cap_y + PAD + SIZE * 0.78
+    x0, y0 = X0 + PAD, cap_y + PAD + SIZE * 0.78 + max(Y1 - cap_y - need, 0) / 2   # spare split above and below
     body = "".join(tspan_line(line, x0, y0 + i * LH, i) for i, line in enumerate(lines))
     new_text = (f'<text x="{x0:.2f}" y="{y0:.2f}" style="{STYLE};--wrap:{lw - 2 * PAD:.1f}px" xml:space="preserve" id="text1217">'
                 f'{body}</text>')

@@ -55,8 +55,7 @@ S2_WHY = [("Earlier contrastive methods can be thought of as comparing the test 
 S2_BULLETS = [("sub", "\u2212", [("Subtractive methods", "b"), (" such as cPCA subtract two covariances, but require hyperparameter tuning", "")]),
               ("div", "\u00f7", [("Ratio methods", "b"), (" such as ρPCA divide two covariances, amplifying directions dominated "
                                   "by noise", "")])]
-S2_BPCA = [("bPCA subtracts a noise baseline, then orthogonalizes the eigenvectors ", ""), ("V", "i"),
-           (" symmetrically against the test data:", "")]
+S2_BPCA = [("bPCA subtracts noise covariance, whitens corrected redundancy, then orthogonalizes the test data:", "")]
 S2_EIG = [("Eigenvalues are test variance above the noise floor, in units of the redundancy baseline (negative "
            "eigenvalues are dropped: +); PCA, cPCA and ρPCA are thus limiting cases.", "")]
 # Texts with no other home in this script (Sections 1, 2, 3, 4, 5), set here so the poster text has one source.
@@ -329,7 +328,7 @@ def layout_s2(s):
     inner_w = full - 2 * PAD
     why_h = (S2_BAR + PAD + len(wrap(S2_WHY, inner_w, WS)) * lhw
              + sum(len(wrap(runs, inner_w - BUL, WS)) * lhw + GAP_B for _, _, runs in S2_BULLETS)
-             + len(wrap(S2_BPCA, inner_w, WS)) * lhw + GAP_B + 20 + asc(gev) + desc(gev) + 20
+             + lhw + len(wrap(S2_BPCA, inner_w, WS)) * lhw + GAP_B + 20 + asc(gev) + desc(gev) + 20
              + len(wrap(S2_EIG, inner_w, WS)) * lhw + PAD)
     intro_foot = y + 10                             # last baseline plus descent
     avail = S2_FOOT - intro_foot - 3 * S2_VGAP      # intro, row, box and the section foot, at least S2_VGAP apart
@@ -395,6 +394,7 @@ def layout_s2(s):
         s = move_text(s, f"s2-why-{key}-text", S2_X0 + PAD + BUL, y + 0.78 * WS, inner_w - BUL)
         s = retext(s, f"s2-why-{key}-text", runs)
         y += retext.lines * lhw + GAP_B
+    y += lhw                                        # a blank line between the earlier methods and bPCA
     s = move_text(s, "s2-why-bpca-text", S2_X0 + PAD, y + 0.78 * WS, inner_w)
     s = retext(s, "s2-why-bpca-text", S2_BPCA)
     y += retext.lines * lhw + 20 + asc(gev)
@@ -489,20 +489,33 @@ def main():
         s = swatch(s, f"s3-swatch-{i}", 1893, y, colour)
     s = retext(s, "text1262", [("Noise baseline", "b"),
         (": counting noise of firing rates, from spontaneous spikes (below)", "")], max_lines=1)
-    s = retext(s, "text1267", [("(d)", "b"),
+    noise_cap = [("(d)", "b"),
         (" Noise dominates fast fluctuations, so short windows can be used to estimate the noise covariance.\n", ""),
         ("(e)", "b"),
         (" We measure noise covariance from spontaneous spikes in 10 ms bins, scaled up to a trial-mean rate, which "
-         f"has a median of {NOISE_FRAC}% of units' trial-mean variance.", "")], max_lines=4)
-    s = retext(s, "text1277", [("Above:", "i"), (" ", ""), ("(f)", "b"),
+         f"has a median of {NOISE_FRAC}% of units' trial-mean variance.", "")]
+    nb = [float(v) for v in re.search(r'<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" [^>]*id="s3-noise-box"', s).groups()]
+    M, P = 12, 16                                   # the caption's white box: inset in the grey box; text padding
+    if 'id="s3-noise-capbox"' not in s:
+        s = re.sub(r'(<text [^>]*id="text1267")', r'<rect x="0" y="0" width="0" height="0" style="fill:#ffffff;stroke:none" id="s3-noise-capbox"/>\1', s, count=1)
+    ch = 2 * P + 36 * 0.78 + (len(wrap(noise_cap, nb[2] - 2 * M - 2 * P, 36)) - 1) * 36 * 1.133 + 36 * 0.3
+    cy = nb[1] + nb[3] - M - ch                     # at the foot of the grey box
+    s = set_box(s, "s3-noise-capbox", nb[0] + M, cy, nb[2] - 2 * M, ch)
+    s = move_text(s, "text1267", nb[0] + M + P, cy + P + 36 * 0.78, nb[2] - 2 * M - 2 * P)
+    s = retext(s, "text1267", noise_cap, max_lines=4)
+    s3_cap = [("Above:", "i"), (" ", ""), ("(f)", "b"),
         (" Trial-mean responses of an example session (537 units) on its two leading PCA components; colors mark "
          "grating direction and crosses the class means.\n", ""),
         ("(g)", "b"), (" The same session on its two leading bPCA components.\n", ""),
         ("(h)", "b"), (" Error in decoding direction from the top ", ""), ("k", "i"),
         (" components (linear discriminant classifier, 5-fold cross-validation repeated 8 times; mean ± SD across "
-         "23 sessions; dashed line: chance).", "")])
-    cap_h = max(371.12, 3246.56 + (retext.lines - 1) * 36 * 1.133 + 29.58 - 3197.76)
+         "23 sessions; dashed line: chance).", "")]
+    n_cap = len(wrap(s3_cap, 962, 36))
+    cap_h = max(371.12, 3246.56 + (n_cap - 1) * 36 * 1.133 + 29.58 - 3197.76)
     s = set_box(s, "s3-caption-box", 1885, 3197.76, 1010, cap_h)
+    text_h = 36 * 0.78 + (n_cap - 1) * 36 * 1.133 + 36 * 0.3
+    s = move_text(s, "text1277", 1909, 3197.76 + (cap_h - text_h) / 2 + 36 * 0.78, 962)   # centred in its box
+    s = retext(s, "text1277", s3_cap)
     s = set_box(s, "s3-callout-box", 2923, 3197.76, 537, cap_h)
     s = add_text(s, "s3-callout-detail2", "s3-callout-detail")
     for row, tid in zip(CALLOUT, ("s3-callout-detail", "s3-callout-detail2")):     # two methods per row

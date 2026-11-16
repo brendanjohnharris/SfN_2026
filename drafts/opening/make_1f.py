@@ -285,8 +285,6 @@ def option1f_vertical(out=POSTER_FIG):
     sheet(s, OX, oy2, k, cells, set(spont), GREY, e_b, "b", z=z)
     gx, gy, sz = 150, oy2 + SH / 2 - 20, 64
     s.rect(gx - sz / 2, gy - sz / 2, sz, sz, fill="#9d9d9d", stroke=INK, sw=2.0, rx=8)
-    for i, w in enumerate(("Redundant", "covariance")):                  # under the screen; one line would reach the sheet
-        s.text(gx, gy + sz / 2 + 38 + i * 1.133 * LAB, w, size=LAB, fill=BLUE, weight=700, anchor="middle")
 
     # ---- the question, centred in the gap ---------------------------------------------------------
     sb = oy2 + SH
