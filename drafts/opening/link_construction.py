@@ -23,6 +23,7 @@ POSTER = os.path.join(ROOT, "SfN_2026.svg")
 FIG = "figures/src/construction_poster.svg"
 X0, X1, Y0, Y1 = 103, 1678, 631, 2081       # Section 1's content area (51 inside the white panel)
 GUTTER, CAP_GAP = 30, 40                    # column to figure; intro text to caption box
+NUDGE = -30                                 # the figure drawn left of its slot: its own left margin is empty
 PAD, SIZE, LH = 26, 36, 36 * 1.133          # caption box padding, font size, line height
 LH40 = 40 * 1.133                           # the intro's line height
 STYLE = f"font-size:{SIZE}px;line-height:1.133;font-family:'Source Sans 3';fill:#100f0d;text-anchor:start"
@@ -99,7 +100,7 @@ def main():
     s, n = re.subn(r'<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+" id="rect275"/>',
                    f'<rect x="{fx:.2f}" y="{Y0:.2f}" width="{slot_w:.2f}" height="{slot_h:.2f}" id="rect275"/>', s); assert n == 1
     s, n = re.subn(r'data-crop="[^"]*">(<g transform=")matrix\([^)]*\)(" id="g795"><image id="s1-construction-src" xlink:href="[^"]*" x="0" y="0" )width="[\d.]+" height="[\d.]+"',
-                   rf'data-crop="0 0 {fw:g} {fh:g}">\g<1>matrix({k:.5f},0,0,{k:.5f},{fx},{Y0})\g<2>width="{fw:g}" height="{fh:g}"', s); assert n == 1
+                   rf'data-crop="0 0 {fw:g} {fh:g}">\g<1>matrix({k:.5f},0,0,{k:.5f},{fx + NUDGE},{Y0})\g<2>width="{fw:g}" height="{fh:g}"', s); assert n == 1
     open(POSTER, "w", encoding="utf-8").write(s)
     print(f"section 1: text column {lw}, caption {lay.lines} lines ({spare:.0f} px spare); figure {slot_w} x {slot_h} at k = {k:.3f}")
 

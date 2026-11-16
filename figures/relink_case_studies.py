@@ -23,6 +23,7 @@ import re
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 POSTER = os.path.join(ROOT, "SfN_2026.svg")
 FIG3 = "figures/src/Fig3_case_studies.svg"
+FIG3_S3 = "figures/src/Fig3_case_studies_poster.svg"   # FIG3 without row 1's tint, written by this script
 FIG3_W, FIG3_H = 720, 730
 NOISE_FIG, NOISE_W, NOISE_H = "figures/src/noise_poster.svg", 535, 189
 NOISE_LAYOUT = "figures/src/noise_poster_layout.tsv"               # axis boxes, figure units (y down)
@@ -65,7 +66,7 @@ S2_BASES = [("r", "#6ea0f9", [("Redundancy baseline", "b"), (": the system measu
 BUL_PITCH = 48.66                         # bullet line pitch, as in Section 3
 TEXTS = {
     "text1195": [("Stimuli confine neural population activity to ", ""), ("low-dimensional subspaces", "b"),
-                 (", usually inferred with ", ""), ("principal component analysis", "b"), (" (PCA) [1]. But recordings also "
+                 (", usually inferred (without supervision) using ", ""), ("principal component analysis", "b"), (" (PCA) [1]. But recordings also "
                  "carry ", ""), ("nuisance covariance", "b"), (" that is present even without a stimulus:", "")],
     "text1197": [("Redundancy", "b"), (": neurons co-fluctuate during spontaneous activity [2]", "")],
     "text1204": [("Noise", "b"), (": rates estimated from spike counts in finite trials carry measurement error", "")],
@@ -91,7 +92,7 @@ REFS = [
 ]
 REF_IDS = ["text1339", "text1342", "text1345", "text1348", "text1351", "text1354", "text-ref7"]
 REF_COLS = ((3666.0, 3), (4473.5, 4))     # column x and how many refs it holds
-REF_Y0, REF_LH, REF_GAP = 3415.44, 29.3 * 1.27, 6.05
+REF_Y0, REF_LH, REF_GAP = 3442.44, 29.3 * 1.27, 6.05   # Y0 centres the text in its box (3369-3741; ink was 3394-3662 at 3415.44)
 TITLES = {"tspan1220": "bPCA corrects for redundancy and noise", "tspan1251": "Other contrastive methods",
           "tspan1316": "Other applications"}   # s2-subtitle, s2-whynot-title, s5-beyond-title
 PAD, CAP_SIZE = 26, 36                    # caption box padding and font size (poster convention)
@@ -104,8 +105,8 @@ LABEL = "font-size:42px;line-height:1.133;font-family:'Source Sans 3';fill:#100f
 # Fig3 crops (x y w h, figure units), measured from a 2.5 px/unit render: inside each row's bubble border.
 CROP_S3 = (172, 14, 541, 215)             # row 1, (b) PCA, (c) bPCA, (d) decoding
 COVER_S3 = (172, 14, 541, 29.3)           # the row's panel titles (axes start at y = 44)
-EDGE_S3 = (709, 14, 4, 215)               # the panel's rounded right edge
-TINT_S3 = "#f6f9f9"                       # Fig3's panel tint: covers in it make the crop one even panel
+EDGE_S3 = (709, 14, 8, 215)               # the panel's rounded right edge
+TINT_S3 = "#ffffff"                       # the crop sits on white (FIG3_S3 drops the row tint); covers match
 TITLE_BASE_S3 = 37.5                      # source title baseline (figure units) for the poster's own labels
 
 # Numbers from the refreshed outputs (LAB/plots/Fig3_case_studies/*.tsv, data/*.jld2, noisefig_poster.jl's log).
@@ -427,7 +428,11 @@ def main():
     s, n = re.subn(r'<clipPath id="clip-s3-results" clipPathUnits="userSpaceOnUse"><rect [^>]*id="([^"]+)"/></clipPath>',
                    lambda m: clip_def("clip-s3-results", placed, m.group(1)), s)
     assert n == 1, "clip-s3-results not found"
-    g = group("s3-results", "g1031", FIG3, CROP_S3, K3, tx, ty, [cover("s3-results", 0, COVER_S3, TINT_S3), cover("s3-results", 1, EDGE_S3, TINT_S3)])
+    src = open(os.path.join(ROOT, FIG3), encoding="utf-8").read()
+    src, n = re.subn(r'(fill="rgb\(30\.260858%, 57\.749259%, 57\.516623%\)" fill-opacity=")0\.05("[^>]*stroke-opacity=")0\.3"', r'\g<1>0\g<2>0"', src)   # row 1's teal tint and outline
+    assert n == 1, "Fig3 row 1 tint not found"
+    open(os.path.join(ROOT, FIG3_S3), "w", encoding="utf-8").write(src)
+    g = group("s3-results", "g1031", FIG3_S3, CROP_S3, K3, tx, ty, [cover("s3-results", 0, COVER_S3, TINT_S3), cover("s3-results", 1, EDGE_S3, TINT_S3)])
     s, n = re.subn(r'<g id="s3-results" .*?</g></g>', g, s, count=1, flags=re.S)
     assert n == 1
     for lid in ("s3-results-label-a", "s3-results-label-b", "s3-results-label-c"):
@@ -499,7 +504,20 @@ def main():
     if 'id="s3-noise-capbox"' not in s:
         s = re.sub(r'(<text [^>]*id="text1267")', r'<rect x="0" y="0" width="0" height="0" style="fill:#ffffff;stroke:none" id="s3-noise-capbox"/>\1', s, count=1)
     ch = 2 * P + 36 * 0.78 + (len(wrap(noise_cap, nb[2] - 2 * M - 2 * P, 36)) - 1) * 36 * 1.133 + 36 * 0.3
-    cy = nb[1] + nb[3] - M - ch                     # at the foot of the grey box
+    # figure (from its letters' cap tops to its ink foot) and caption box spaced evenly down the grey box
+    INK_FOOT, LBL_UP, CAP_TOP = 169.75, 19.7, 30.8  # figure units: "Time"'s foot (measured); letter baseline above the series axis; 42 px cap height
+    mm = re.search(r'<g id="s3-noise" transform="matrix\(([\d.]+),0,0,[\d.]+,([\d.]+),([\d.]+)\)"', s)
+    k3n = float(mm.group(1))
+    INK_L, INK_R = 8.6, 491.6                       # figure units: "Rate" to the end of the "(e) Noise covariance" title (measured)
+    x3n = nb[0] + (nb[2] - (INK_R - INK_L) * k3n) / 2 - INK_L * k3n   # centred in the grey box
+    ys = L3["series"][1] * k3n
+    content_h = INK_FOOT * k3n - ys + LBL_UP + CAP_TOP
+    g = (nb[3] - content_h - ch) / 3
+    ty = nb[1] + g + CAP_TOP + LBL_UP - ys
+    s = s[: mm.start()] + f'<g id="s3-noise" transform="matrix({k3n:g},0,0,{k3n:g},{x3n:.2f},{ty:.2f})"' + s[mm.end():]
+    for lid, panel in (("s3-noise-label-d", "series"), ("s3-noise-label-e", "covariance")):
+        s = set_label(s, lid, x3n + (L3[panel][0] - 8) * k3n, ty + ys - LBL_UP)
+    cy = nb[1] + nb[3] - g - ch
     s = set_box(s, "s3-noise-capbox", nb[0] + M, cy, nb[2] - 2 * M, ch)
     s = move_text(s, "text1267", nb[0] + M + P, cy + P + 36 * 0.78, nb[2] - 2 * M - 2 * P)
     s = retext(s, "text1267", noise_cap, max_lines=4)
@@ -531,7 +549,7 @@ def main():
     assert 3197.76 + cap_h + 62 + 40 * 1.133 + 10 < 3742, "Section 3 closing text overruns the section"
     pca, bpca = round(PCA_K2), round(BPCA_K2)
     s, n = re.subn(r'(<tspan id="tspan1279">)[^<]*(</tspan>)', rf"\g<1>{pca}° → {bpca}°\g<2>", s); assert n == 1
-    s, n = re.subn(r'(<tspan id="tspan1284">)[^<]*(</tspan>)', rf"\g<1>chance {round(CHANCE)}°\g<2>", s); assert n == 1
+    s, n = re.subn(r'(<tspan id="tspan1284">)[^<]*(</tspan>)', rf"\g<1>Chance level {round(CHANCE)}°\g<2>", s); assert n == 1
     s = retext(s, "text1287", [("With spontaneous activity as the redundancy baseline, ", ""),
         ("bPCA concentrates stimulus information into its leading components", "b"),
         (f", cutting the mean two-component error by {round(PCA_K2 - BPCA_K2)}°.", "")], max_lines=2)
@@ -583,19 +601,44 @@ def main():
          "instrument artifact.", "")], max_lines=4)
     s = retext(s, "text1297", [("Noise baseline", "b"),
         (": a calibration recording of the instrument only", "")], max_lines=1)
-    s = retext(s, "text1305", [("(a)", "b"),
+    text1305_runs = [("(a)", "b"),
         (f" The leading PCA component is a slow phantom oscillation (ρ\u00a0=\u00a0{R_TRACE_PCA:.2f} with the latent), "
          f"whereas the leading bPCA component recovers the latent (ρ\u00a0=\u00a0{R_TRACE_BPCA:.2f}). Given the same redundancy "
          f"baseline, cPCA (ρ\u00a0=\u00a0{MC_CPCA:.2f}) and ρPCA (ρ\u00a0=\u00a0{MC_RHOPCA:.2f}) also fail (medians over {NSIM} simulations).\n", ""),
         ("(b)", "b"),
         (f" Held-out eigenvalues (medians across {NSIM} simulations): the two leading PCA eigenvalues are nearly "
          "equal, as for phantom oscillations, whereas the bPCA eigenvalues fall to the baseline level of one "
-         "(dashed) by the third component.", "")])
-    bh = 2 * PAD + CAP_SIZE * 0.78 + (retext.lines - 1) * CAP_SIZE * 1.133 + CAP_SIZE * 0.3
-    assert by + bh < 2649.37 - 25, f"Section 4 caption runs into the Summary bar ({by + bh:.0f})"
-    s, n = re.subn(r'<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+" style="fill:#eef1f2;stroke:none" id="s4-caption-box"/>',
-                   f'<rect x="{bx:.2f}" y="{by:.2f}" width="{bw:.2f}" height="{bh:.2f}" style="fill:#eef1f2;stroke:none" id="s4-caption-box"/>', s)
+         "(dashed) by the third component.", "")]
+    s = retext(s, "text1305", text1305_runs)
+    # (a), (b) and their caption in one grey box: figure above, caption in a white box at the foot, gaps even
+    # grey box behind the schematic's traces; below it (a), (b) on white and their caption in a grey box, gaps even
+    s = re.sub(r'<rect [^>]*id="s4-panel-box"/>', "", s)    # (a), (b) no longer boxed
+    ms = re.search(r'<g id="s4-schematic" transform="matrix\(([\d.]+),0,0,[\d.]+,([\d.]+),([\d.]+)\)"', s)
+    sy = float(ms.group(3))
+    SB = (sy - 8, sy + PHANTOM_H * K4 + 16)          # schematic box: its ink runs from about +17 to +555
+    s = re.sub(r'<rect [^>]*id="s4-schematic-box"/>', "", s)
+    s = s.replace('<g id="s4-schematic" ', '<rect x="0" y="0" width="0" height="0" style="fill:#eef1f2;stroke:none" id="s4-schematic-box"/><g id="s4-schematic" ', 1)
+    bw = SLOT_S4[2]
+    s = set_box(s, "s4-schematic-box", SLOT_S4[0], SB[0], bw, SB[1] - SB[0])
+    OT, OB = SB[1], 2624.0                          # 25 above the Summary bar
+    n5 = retext.lines
+    ch = 2 * PAD + CAP_SIZE * 0.78 + (n5 - 1) * CAP_SIZE * 1.133 + CAP_SIZE * 0.3
+    L4 = layout(RESULTS_LAYOUT)
+    top_off = L4["traces"][1] * K4 - 30 - 0.73 * 42  # figure top to the letters' cap tops
+    content_h = RESULTS_H * K4 - top_off
+    g = (OB - OT - content_h - ch) / 2
+    assert g > 10, f"Section 4 too full (gaps {g:.0f})"
+    y4, x4 = OT + g - top_off, SLOT_S4[0]
+    s, n = re.subn(r'(<g transform="matrix\()[^)]*(\)" id="g1178">)', rf"\g<1>{K4:g},0,0,{K4:g},{x4:.2f},{y4:.2f}\g<2>", s); assert n == 1
+    s = set_label(s, "s4-results-label-a", x4 + L4["traces"][0] * K4, y4 + L4["traces"][1] * K4 - 30)
+    s = set_label(s, "s4-results-label-b", x4 + (L4["eigenspectra"][0] - 28) * K4, y4 + L4["eigenspectra"][1] * K4 - 30)
+    cy = OB - ch
+    s, n = re.subn(r'<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+" style="fill:#[0-9a-f]+;stroke:none" id="s4-caption-box"/>',
+                   f'<rect x="{x4:.2f}" y="{cy:.2f}" width="{bw:.2f}" height="{ch:.2f}" style="fill:#eef1f2;stroke:none" id="s4-caption-box"/>', s)
     assert n == 1, "s4-caption-box not found"
+    s = move_text(s, "text1305", x4 + PAD, cy + PAD + CAP_SIZE * 0.78, bw - 2 * PAD)
+    s = retext(s, "text1305", text1305_runs)
+    assert retext.lines == n5, "Section 4 caption rewrapped"
 
     s = add_text(s, "text-ref7", "text1354")
     refs = iter(enumerate(zip(REF_IDS, REFS), 1))

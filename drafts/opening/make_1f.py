@@ -271,8 +271,10 @@ def option1f_vertical(out=POSTER_FIG):
     # ---- (a) drifting gratings ----------------------------------------------------------------
     s.rich(LX, 42, [("(a)", {"weight": 700}), (" Drifting gratings", {"weight": 700})], size=TITLE)
     P = sheet(s, OX, oy, k, cells, set(stim) | set(spont), colors, e_a, "a", z=z)
-    line = [(96, oy + r * 166), (134, oy + r * 104), (170, oy + r * 44), (204, oy - r * 14)]
-    sizes = [66, 60, 54, 48]
+    sizes = [60] * 4                       # one size: no shrinking into the distance
+    ys = [oy + r * 166, oy + r * 104, oy + r * 44, oy - r * 14]
+    edge = lambda y: OX + SHEAR / SQUASH * (y - oy)   # the sheet's left edge at height y
+    line = [(edge(y) - sz / 2 - 22, y) for y, sz in zip(ys, sizes)]   # fanned up and left, parallel to that edge
     for (d, (gx, gy), sz) in zip((0, 45, 90, 135), line, sizes):
         grating(s, gx, gy, sz, d, f"a{d}", sw=2.0)
         s.text(gx - sz / 2 - 9, gy + 9, f"{d}°", size=SMALL, fill=DIRS[d], weight=600, anchor="end")
