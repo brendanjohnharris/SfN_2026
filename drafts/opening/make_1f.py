@@ -249,7 +249,8 @@ def option1f_vertical(out=POSTER_FIG):
     squash0, SQUASH = SQUASH, 0.9
     rng = np.random.default_rng(12)
     W = 720
-    H = round(W * SLOT_H / SLOT_W)
+    CL, CR = 30, 18                       # cropped margins: content spans 32-699, so the figure zooms to fill the slot
+    H = round((W - CL - CR) * SLOT_H / SLOT_W)   # shorter, so the panel gaps shrink
     s = SVG(W, H)
     cells, spont, stim, pref, colors = population(rng)
     k, z = 1.0, 1.25                      # sheet scale; glyph and stroke zoom
@@ -259,6 +260,7 @@ def option1f_vertical(out=POSTER_FIG):
     in_b = {(i, j) for i, j, _ in e_b}
     e_c = [e for e in knn_edges(cells, stim, 2, wmul=1.3) if (e[0], e[1]) not in in_b]
     OX = 250                               # every sheet shares this left edge
+    LX = 144                               # panel titles: 20% of the width in, nearer the sheets
     CAP, DROP = 30, 40                     # label cap height, label baseline to sheet top
     SH = SQUASH * SHEET_H + 7 * z          # a sheet's drawn height
     r = SQUASH / squash0                   # the grating stack stretches with the sheet
@@ -267,7 +269,7 @@ def option1f_vertical(out=POSTER_FIG):
     GAP = (H - stack_bottom - 2 * (CAP + DROP + SH)) / 2     # equal gaps between panels
 
     # ---- (a) drifting gratings ----------------------------------------------------------------
-    s.rich(0, 42, [("(a)", {"weight": 700}), (" Drifting gratings", {"weight": 700})], size=TITLE)
+    s.rich(LX, 42, [("(a)", {"weight": 700}), (" Drifting gratings", {"weight": 700})], size=TITLE)
     P = sheet(s, OX, oy, k, cells, set(stim) | set(spont), colors, e_a, "a", z=z)
     line = [(96, oy + r * 166), (134, oy + r * 104), (170, oy + r * 44), (204, oy - r * 14)]
     sizes = [66, 60, 54, 48]
@@ -280,7 +282,7 @@ def option1f_vertical(out=POSTER_FIG):
     # ---- (b) gray screen ------------------------------------------------------------------------
     lb = stack_bottom + GAP + CAP
     s.text(470, (max(oy + SH, stack_bottom) + lb - CAP) / 2 + 0.3 * 90, "\u00f7", size=90, weight=700, fill=INK, anchor="middle")   # bPCA: (a) relative to (b)
-    s.rich(0, lb, [("(b)", {"weight": 700}), (" Gray screen", {"weight": 700})], size=TITLE)
+    s.rich(LX, lb, [("(b)", {"weight": 700}), (" Gray screen", {"weight": 700})], size=TITLE)
     oy2 = lb + DROP
     sheet(s, OX, oy2, k, cells, set(spont), GREY, e_b, "b", z=z)
     gx, gy, sz = 150, oy2 + SH / 2 - 20, 64
@@ -289,13 +291,17 @@ def option1f_vertical(out=POSTER_FIG):
     # ---- the question, centred in the gap ---------------------------------------------------------
     sb = oy2 + SH
     mid = sb + GAP / 2
-    thin_arrow(s, 470, mid - 34, 470, mid + 34, INK, sw=2.8, head=15)
+    HL, HW, SW = 26, 28, 9                 # head length and width; shaft as thick as the ÷ bar
+    s.line(470, mid - 34, 470, mid + 34 - HL + 1, stroke=INK, sw=SW, cap="butt")
+    s.add(f'<path d="M470,{mid + 34:.1f} L{470 - HW / 2},{mid + 34 - HL:.1f} L{470 + HW / 2},{mid + 34 - HL:.1f} Z" style="fill:{INK};stroke:none"/>')
 
     # ---- (c) stimulus-engaged -----------------------------------------------------------------
     lc = sb + GAP + CAP
-    s.rich(0, lc, [("(c)", {"weight": 700}), (" Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=TITLE)
+    s.rich(LX, lc, [("(c)", {"weight": 700}), (" Stimulus-engaged", {"weight": 700, "fill": GREEN})], size=TITLE)
     bg = set(spont) - set(stim)
     sheet(s, OX, lc + DROP, k, cells, set(stim), colors, e_c, "c", dim_inactive=True, z=z, flat=(e_b, bg))   # (b) at baseline, not erased
+    s.parts = [f'<g transform="translate({-CL},0)">'] + s.parts + ["</g>"]
+    s.w = W - CL - CR
     s.save(out, "The construction: gratings, gray screen, and what the grating engaged")
     SQUASH = squash0
     print(f"vertical figure {W} x {H}, panel gap {GAP:.0f}")
